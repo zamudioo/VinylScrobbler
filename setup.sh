@@ -43,7 +43,7 @@ fi
 pip install --upgrade pip
 pip install -r "$BASE_DIR/requirements.txt"
 
-read -p "Edit advanced audio settings? (y/N): " ADVANCED
+read -p "Edit advanced settings? (y/N): " ADVANCED
 
 SAMPLE_RATE=44100
 CHUNK_SECONDS=10
