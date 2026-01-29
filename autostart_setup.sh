@@ -15,7 +15,7 @@ echo "
 ██▄▄██ ██ ███▄██ ▀███▀ ██    ▀▀▀▄▄▄ ██▀▀▀ ██▄█▄ ██▀██ ██▄██ ██▄██ ██    ██▄▄  ██▄█▄ 
  ▀██▀  ██ ██ ▀██   █   ██▄▄▄ █████▀ ▀████ ██ ██ ▀███▀ ██▄█▀ ██▄█▀ ██▄▄▄ ██▄▄▄ ██ ██ 
                                                                                     
-(autostart config)"
+(autostart setup)"
 
 if [[ ! -f "$BACKEND_SCRIPT" || ! -f "$FRONTEND_SCRIPT" ]]; then
   echo "Error: backend.sh or frontend.sh not found."

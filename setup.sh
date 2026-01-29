@@ -86,7 +86,7 @@ read -p "LASTFM_USERNAME: " LASTFM_USERNAME
 read -s -p "LASTFM_PASSWORD: " LASTFM_PASSWORD
 echo
 
-LASTFM_PASSWORD_HASH=$(echo -n "$LASTFM_USERNAME$LASTFM_PASSWORD" | md5sum | awk '{print $1}')
+LASTFM_PASSWORD_HASH=$(echo -n "$LASTFM_PASSWORD" | md5sum | awk '{print $1}')
 
 if ! command -v wlr-randr >/dev/null; then
   echo "wlr-randr not installed."
@@ -139,13 +139,14 @@ chmod +x "$BASE_DIR/backend.sh"
 cat > "$BASE_DIR/frontend.sh" <<EOF
 #!/usr/bin/env bash
 export DISPLAY=:0
-chromium \\
---disable-gpu-compositing \\
---disable-gpu-rasterization \\
---disable-smooth-scrolling \\
---disable-features=VizDisplayCompositor \\
---disable-extensions \\
---kiosk file://$FRONTEND_DIR/index.html
+chromium \
+  --disable-gpu-compositing \
+  --disable-gpu-rasterization \
+  --disable-smooth-scrolling \
+  --disable-features=VizDisplayCompositor \
+  --disable-extensions \
+  --kiosk \
+  file://$FRONTEND_DIR/index.html
 EOF
 chmod +x "$BASE_DIR/frontend.sh"
 
@@ -156,4 +157,4 @@ echo "  ./backend.sh"
 echo "  ./frontend.sh"
 echo
 echo "If you want autostart on boot, run:"
-echo "  ./install-services.sh"
+echo "  ./autostart_setup.sh"
