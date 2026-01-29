@@ -1,9 +1,4 @@
-#                                                                                     
-                                                                                    
-██  ██ ▄▄ ▄▄  ▄▄ ▄▄ ▄▄ ▄▄    ▄█████  ▄▄▄▄ ▄▄▄▄   ▄▄▄  ▄▄▄▄  ▄▄▄▄  ▄▄    ▄▄▄▄▄ ▄▄▄▄  
-██▄▄██ ██ ███▄██ ▀███▀ ██    ▀▀▀▄▄▄ ██▀▀▀ ██▄█▄ ██▀██ ██▄██ ██▄██ ██    ██▄▄  ██▄█▄ 
- ▀██▀  ██ ██ ▀██   █   ██▄▄▄ █████▀ ▀████ ██ ██ ▀███▀ ██▄█▀ ██▄█▀ ██▄▄▄ ██▄▄▄ ██ ██ 
-                                                                                    
+#VinylScrobbler
 
 Vinyl Scrobbler is a Python project that listens to audio, mainly from physical sources like vinyl records or CDs, and scrobbles the recognized tracks to your Last.fm profile. It also shows artwork, artist, and track info while playing.
 
