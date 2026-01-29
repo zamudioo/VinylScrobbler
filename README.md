@@ -26,7 +26,9 @@ There are three main ways to feed audio:
 3. Using a microphone near the speakers, but its less precise and can get activate with any ambient sound.
 
 When it doesnt detect any sound coming from the audio source, it automatically goes to an IDLE mode, where it shows a simple clock, and after 5 min it turns off the monitor.
+
 When it detects sound from the source, it automatically turns on and continues showing the artwork.
+
 You can adjust this times in /backend/config.py.
 
 ## Setup
