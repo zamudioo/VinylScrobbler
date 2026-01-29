@@ -1,0 +1,31 @@
+<!-- ZamudioScrobbler/frontend/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vinyl Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="background"></div>
+
+  <div id="idle" class="screen active">
+    <div class="clock" id="clock">00:00</div>
+    <div class="subtitle" id="date">—</div>
+  </div>
+
+  <div id="playing" class="screen">
+    <div class="card">
+      <img id="cover" src="" alt="cover">
+      <div class="info">
+        <div class="title" id="title">—</div>
+        <div class="artist" id="artist">—</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
