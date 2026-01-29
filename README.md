@@ -25,6 +25,10 @@ There are three main ways to feed audio:
 2. Use a splitter in between the signal and the output: one part goes to speakers/amplifier and the other goes to a USB audio converter.
 3. Using a microphone near the speakers, but its less precise and can get activate with any ambient sound.
 
+When it doesnt detect any sound coming from the audio source, it automatically goes to an IDLE mode, where it shows a simple clock, and after 5 min it turns off the monitor
+When it detects sound from the source, it automatically turns off and shows the artwork
+You can adjust this times in /backend/config.py
+
 ## Setup
 
 1. Create a Last.fm account and get your API key and secret from [Last.fm API](https://www.last.fm/api/).
