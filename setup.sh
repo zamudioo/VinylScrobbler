@@ -43,7 +43,7 @@ fi
 pip install --upgrade pip
 pip install -r "$BASE_DIR/requirements.txt"
 
-read -p "Edit advanced settings? (Audio and times, not recommended if you dont know what you are doing) (y/N): " ADVANCED
+read -p "Edit advanced settings? (Audio and times, not recommended if you dont know what you are doing, you can always change them in backend/config.py) (y/N): " ADVANCED
 
 SAMPLE_RATE=44100
 CHUNK_SECONDS=10
