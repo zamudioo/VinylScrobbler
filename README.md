@@ -10,6 +10,7 @@ The main goals of this project are:
 
 1. Display music information such as cover art, track, and artist.
 2. Keep a record of tracks you play on Last.fm.
+3. Auto turn off the display where the info is being shown.
 
 ## How It Works
 
@@ -29,7 +30,7 @@ When it doesnt detect any sound coming from the audio source, it automatically g
 
 When it detects sound from the source, it automatically turns on and continues showing the artwork.
 
-You can adjust this times in /backend/config.py.
+You can adjust this times in the advance config section or in /backend/config.py.
 
 ## Setup
 
