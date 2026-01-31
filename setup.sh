@@ -138,6 +138,7 @@ chmod +x "$BASE_DIR/backend.sh"
 
 cat > "$BASE_DIR/frontend.sh" <<EOF
 #!/usr/bin/env bash
+sleep 10
 export DISPLAY=:0
 chromium \
   --disable-gpu-compositing \
