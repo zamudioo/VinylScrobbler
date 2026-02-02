@@ -6,6 +6,17 @@ from logger import logger
 
 shazam = Shazam()
 
+def extract_album(track: dict) -> str | None:
+
+    sections = track.get("sections", [])
+    for section in sections:
+        if section.get("type") == "SONG":
+            metadata = section.get("metadata", [])
+            for item in metadata:
+                if item.get("title", "").lower() == "album":
+                    return item.get("text")
+    return None
+
 async def identify(audio, sample_rate):
     logger.info("Sending audio to Shazam…")
 
@@ -26,16 +37,14 @@ async def identify(audio, sample_rate):
 
         title = track.get("title")
         artist = track.get("subtitle")
+        album = extract_album(track)
+        cover = track.get("images", {}).get("coverart")
 
         logger.info(f"Track identified: {artist} – {title}")
 
         return {
             "title": title,
             "artist": artist,
-            "album": (
-                track.get("sections", [{}])[0]
-                .get("metadata", [{}])[0]
-                .get("text")
-            ),
-            "cover": track.get("images", {}).get("coverart")
+            "album": album,
+            "cover": cover
         }

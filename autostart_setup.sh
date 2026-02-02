@@ -25,6 +25,7 @@ fi
 
 chmod +x "$BACKEND_SCRIPT" "$FRONTEND_SCRIPT"
 
+mkdir -p ~/logs
 mkdir -p "$SYSTEMD_USER_DIR"
 
 # Backend
@@ -42,6 +43,8 @@ Restart=on-failure
 Environment=HOME=$HOME
 Environment=USER=$USER_NAME
 Environment=UID=$USER_UID
+StandardOutput=append:%h/logs/backend.log
+StandardError=append:%h/logs/backend.log
 
 [Install]
 WantedBy=default.target
@@ -62,6 +65,8 @@ Restart=on-failure
 Environment=HOME=$HOME
 Environment=USER=$USER_NAME
 Environment=UID=$USER_UID
+StandardOutput=append:%h/logs/frontend.log
+StandardError=append:%h/logs/frontend.log
 
 [Install]
 WantedBy=default.target
@@ -77,9 +82,8 @@ echo "   - VSBackend"
 echo "   - VSFrontend"
 echo ""
 echo "To view logs:"
-echo "   journalctl --user -u VSBackend -f"
-echo "   journalctl --user -u VSFrontend -f"
-echo "idk why but i think that the raspberry os limits journald user, so this commands for the logs doesnt work like theyr supossed to, imma check that later lol"
+echo "   tail -f ~/logs/backend.log"
+echo "   tail -f ~/logs/frontend.log"
 echo ""
 echo "Important (run only once with sudo):"
 echo "   sudo loginctl enable-linger $USER_NAME"
