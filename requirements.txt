@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sounddevice
+numpy
+shazamio
+pylast
+python-multipart
+soundfile
+audioop-lts

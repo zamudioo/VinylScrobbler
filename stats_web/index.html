@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VinylScrobbler · Stats</title>
+<style>
+  :root {
+    --bg:       #0f0f0f;
+    --surface:  #1a1a1a;
+    --surface2: #242424;
+    --border:   #2e2e2e;
+    --accent:   #e8143e;
+    --accent2:  #ff4d6d;
+    --text:     #f0f0f0;
+    --muted:    #888;
+    --green:    #1db954;
+    --radius:   14px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky; top: 0;
+    background: rgba(15,15,15,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 99;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 18px; font-weight: 700; letter-spacing: -0.5px;
+  }
+  .logo-icon { font-size: 22px; }
+  .now-pill {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 13px;
+    max-width: 320px;
+    overflow: hidden;
+  }
+  .now-pill .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+    transition: background .3s;
+  }
+  .now-pill.playing .dot { background: var(--green); animation: pulse 1.4s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .now-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+  .now-pill.playing .now-text { color: var(--text); }
+
+ 
+  main { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  /* period tabs */
+  .period-bar {
+    display: flex; gap: 6px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .period-btn {
+    padding: 7px 18px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .period-btn:hover { border-color: var(--accent2); color: var(--text); }
+  .period-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 20px;
+  }
+  .stat-card .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 8px; }
+  .stat-card .value { font-size: 32px; font-weight: 700; line-height: 1; }
+  .stat-card .sub   { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-head h2 { font-size: 16px; font-weight: 600; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ramked */
+  .ranked-list { display: flex; flex-direction: column; gap: 2px; }
+  .rank-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    transition: background .15s;
+    cursor: default;
+  }
+  .rank-item:hover { background: var(--surface2); }
+  .rank-num { width: 22px; text-align: right; font-size: 13px; color: var(--muted); flex-shrink: 0; }
+  .rank-cover {
+    width: 40px; height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: var(--surface2);
+    flex-shrink: 0;
+  }
+  .rank-cover.artist { border-radius: 50%; }
+  .rank-info { flex: 1; min-width: 0; }
+  .rank-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rank-sub  { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rank-plays { font-size: 13px; color: var(--muted); flex-shrink: 0; }
+
+  /*gernes */
+  .genre-list { display: flex; flex-direction: column; gap: 10px; }
+  .genre-row {}
+  .genre-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+  .genre-label span:last-child { color: var(--muted); }
+  .genre-track { background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; }
+  .genre-fill  { height: 100%; border-radius: 4px; background: var(--accent); transition: width .6s ease; }
+
+  /* recent */
+  .history-section { margin-top: 36px; }
+  .history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .history-table th {
+    text-align: left; padding: 8px 12px;
+    color: var(--muted); font-weight: 500;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px; text-transform: uppercase; letter-spacing: .6px;
+  }
+  .history-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .history-table tr:last-child td { border-bottom: none; }
+  .history-table tr:hover td { background: var(--surface2); }
+  .h-cover { width: 36px; height: 36px; border-radius: 5px; object-fit: cover; background: var(--surface2); }
+  .h-title { font-weight: 500; }
+  .h-sub   { color: var(--muted); font-size: 12px; }
+  .h-time  { color: var(--muted); white-space: nowrap; }
+  .h-badge {
+    display: inline-block;
+    padding: 2px 8px; border-radius: 100px;
+    background: var(--surface2);
+    font-size: 11px; color: var(--muted);
+  }
+
+  /* load */
+  .load-more-wrap { text-align: center; margin-top: 20px; }
+  .btn-ghost {
+    padding: 9px 24px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-ghost:hover { border-color: var(--text); color: var(--text); }
+
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 6px;
+  }
+  @keyframes shimmer { 0%{background-position:200%}100%{background-position:-200%} }
+
+  .empty { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-icon"></span>
+    VinylScrobbler
+  </div>
+  <div class="now-pill" id="nowPill">
+    <div class="dot"></div>
+    <span class="now-text" id="nowText">Idle</span>
+  </div>
+</header>
+
+<main>
+
+  <div class="period-bar" id="periodBar">
+    <button class="period-btn" data-period="today">TODAY</button>
+    <button class="period-btn active" data-period="week">WEEK</button>
+    <button class="period-btn" data-period="month">MONTH</button>
+    <button class="period-btn" data-period="year">YEAR</button>
+    <button class="period-btn" data-period="all">ALL TIME</button>
+  </div>
+
+  <div class="summary-grid">
+    <div class="stat-card">
+      <div class="label">Playcount</div>
+      <div class="value" id="sPlays">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Total Time</div>
+      <div class="value" id="sTime">—</div>
+      <div class="sub" id="sTimeSub"></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Artists</div>
+      <div class="value" id="sArtists">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Albums</div>
+      <div class="value" id="sAlbums">—</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="section-head"><h2>Top artists</h2></div>
+      <div class="ranked-list" id="artistList"><div class="empty">Loading…</div></div>
+    </div>
+    <div class="card">
+      <div class="section-head"><h2>Top albums</h2></div>
+      <div class="ranked-list" id="albumList"><div class="empty">Loading…</div></div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="section-head"><h2>Top tracks</h2></div>
+      <div class="ranked-list" id="trackList"><div class="empty">Cargando…</div></div>
+    </div>
+    <div class="card">
+      <div class="section-head"><h2>Top genres</div>
+      <div class="genre-list" id="genreList"><div class="empty">Cargando…</div></div>
+    </div>
+  </div>
+
+  <div class="history-section">
+    <div class="section-head"><h2>Recent tracks</h2></div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th style="width:44px"></th>
+            <th>Song</th>
+            <th>Album</th>
+            <th>Genre</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody">
+          <tr><td colspan="5"><div class="empty">Loading…</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="load-more-wrap">
+      <button class="btn-ghost" id="loadMoreBtn" style="display:none">See more</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// Config 
+const API = window.location.origin; // same host as the page
+let currentPeriod = "week";
+let historyPage = 1;
+let historyTotal = 0;
+const HISTORY_LIMIT = 50;
+
+function fmtTime(seconds) {
+  if (!seconds) return "0 min";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m} min`;
+}
+
+function fmtTimeShort(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h >= 24) return `${Math.floor(h/24)}d ${h%24}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m} min`;
+}
+
+function timeAgo(ts) {
+  const diff = Date.now() / 1000 - ts;
+  if (diff < 60) return "hace un momento";
+  if (diff < 3600) return `hace ${Math.floor(diff/60)} min`;
+  if (diff < 86400) return `hace ${Math.floor(diff/3600)} h`;
+  const d = new Date(ts * 1000);
+  return d.toLocaleDateString("es", { day:"numeric", month:"short", year:"numeric" });
+}
+
+function coverImg(url, cls = "") {
+  if (url) return `<img src="${url}" class="rank-cover ${cls}" onerror="this.style.display='none'">`;
+  return `<div class="rank-cover ${cls}" style="background:var(--surface2)"></div>`;
+}
+
+// now
+function connectWS() {
+  const proto = location.protocol === "https:" ? "wss" : "ws";
+  const ws = new WebSocket(`${proto}://${location.host}/ws`);
+
+  ws.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    const pill = document.getElementById("nowPill");
+    const txt  = document.getElementById("nowText");
+    if (data.status === "playing" && data.track) {
+      pill.classList.add("playing");
+      txt.textContent = `${data.track.artist} — ${data.track.title}`;
+    } else {
+      pill.classList.remove("playing");
+      txt.textContent = "Idle";
+    }
+  };
+
+  ws.onclose = () => setTimeout(connectWS, 5000);
+}
+
+
+fetch(`${API}/api/now`).then(r => r.json()).then(data => {
+  const pill = document.getElementById("nowPill");
+  const txt  = document.getElementById("nowText");
+  if (data.status === "playing" && data.track) {
+    pill.classList.add("playing");
+    txt.textContent = `${data.track.artist} — ${data.track.title}`;
+  }
+}).catch(() => {});
+connectWS();
+
+
+function renderArtists(list) {
+  if (!list.length) return `<div class="empty">No data</div>`;
+  return list.map((a, i) => `
+    <div class="rank-item">
+      <span class="rank-num">${i+1}</span>
+      ${coverImg(a.cover_url, "artist")}
+      <div class="rank-info">
+        <div class="rank-name">${esc(a.artist)}</div>
+      </div>
+      <span class="rank-plays">${a.plays} plays</span>
+    </div>
+  `).join("");
+}
+
+function renderAlbums(list) {
+  if (!list.length) return `<div class="empty">No data</div>`;
+  return list.map((a, i) => `
+    <div class="rank-item">
+      <span class="rank-num">${i+1}</span>
+      ${coverImg(a.cover_url)}
+      <div class="rank-info">
+        <div class="rank-name">${esc(a.album)}</div>
+        <div class="rank-sub">${esc(a.artist)}</div>
+      </div>
+      <span class="rank-plays">${a.plays} plays</span>
+    </div>
+  `).join("");
+}
+
+function renderTracks(list) {
+  if (!list.length) return `<div class="empty">No data</div>`;
+  return list.map((t, i) => `
+    <div class="rank-item">
+      <span class="rank-num">${i+1}</span>
+      ${coverImg(t.cover_url)}
+      <div class="rank-info">
+        <div class="rank-name">${esc(t.title)}</div>
+        <div class="rank-sub">${esc(t.artist)}</div>
+      </div>
+      <span class="rank-plays">${t.plays} plays</span>
+    </div>
+  `).join("");
+}
+
+function renderGenres(list) {
+  if (!list.length) return `<div class="empty">No data for this genre</div>`;
+  const max = list[0].plays;
+  return list.map(g => `
+    <div class="genre-row">
+      <div class="genre-label">
+        <span>${esc(g.genre)}</span>
+        <span>${g.plays} plays</span>
+      </div>
+      <div class="genre-track">
+        <div class="genre-fill" style="width:${(g.plays/max*100).toFixed(1)}%"></div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderHistoryRows(plays) {
+  return plays.map(p => `
+    <tr>
+      <td>${p.cover_url ? `<img src="${p.cover_url}" class="h-cover" onerror="this.style.display='none'">` : `<div class="h-cover"></div>`}</td>
+      <td>
+        <div class="h-title">${esc(p.title || "—")}</div>
+        <div class="h-sub">${esc(p.artist || "—")}</div>
+      </td>
+      <td><span class="h-sub">${esc(p.album || "—")}</span></td>
+      <td>${p.genre ? `<span class="h-badge">${esc(p.genre)}</span>` : ""}</td>
+      <td class="h-time">${timeAgo(p.timestamp)}</td>
+    </tr>
+  `).join("");
+}
+
+function esc(str) {
+  if (!str) return "";
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+// ── Load stats ────────────────────────────────────────────────────────────────
+async function loadSummary(period) {
+  try {
+    const res = await fetch(`${API}/api/stats/summary?period=${period}`);
+    const data = await res.json();
+
+    // Summary cards
+    document.getElementById("sPlays").textContent = data.total_plays.toLocaleString("es");
+    document.getElementById("sTime").textContent = fmtTimeShort(data.total_seconds);
+
+    const uniqueArtists = new Set(data.top_artists.map(a => a.artist)).size;
+    const uniqueAlbums  = new Set(data.top_albums.map(a => a.album)).size;
+    // These are just top-10, so show "10+" if full
+    document.getElementById("sArtists").textContent = data.top_artists.length === 10 ? "10+" : data.top_artists.length;
+    document.getElementById("sAlbums").textContent  = data.top_albums.length  === 10 ? "10+" : data.top_albums.length;
+
+    // Lists
+    document.getElementById("artistList").innerHTML = renderArtists(data.top_artists);
+    document.getElementById("albumList").innerHTML  = renderAlbums(data.top_albums);
+    document.getElementById("trackList").innerHTML  = renderTracks(data.top_tracks);
+    document.getElementById("genreList").innerHTML  = renderGenres(data.genres);
+
+  } catch(e) {
+    console.error("Summary fetch error:", e);
+  }
+}
+
+async function loadHistory(page = 1, append = false) {
+  try {
+    const res = await fetch(`${API}/api/stats/history?page=${page}&limit=${HISTORY_LIMIT}`);
+    const data = await res.json();
+    historyTotal = data.total;
+
+    const tbody = document.getElementById("historyBody");
+    if (!append) {
+      tbody.innerHTML = data.plays.length
+        ? renderHistoryRows(data.plays)
+        : `<tr><td colspan="5"><div class="empty">No recent tracks. Play something!</div></td></tr>`;
+    } else {
+      tbody.insertAdjacentHTML("beforeend", renderHistoryRows(data.plays));
+    }
+
+    const btn = document.getElementById("loadMoreBtn");
+    const loaded = page * HISTORY_LIMIT;
+    btn.style.display = loaded < historyTotal ? "inline-block" : "none";
+  } catch(e) {
+    console.error("History fetch error:", e);
+  }
+}
+
+// periodbuttons
+document.getElementById("periodBar").addEventListener("click", e => {
+  const btn = e.target.closest(".period-btn");
+  if (!btn) return;
+  document.querySelectorAll(".period-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  currentPeriod = btn.dataset.period;
+  loadSummary(currentPeriod);
+});
+
+// loadddmore
+document.getElementById("loadMoreBtn").addEventListener("click", () => {
+  historyPage++;
+  loadHistory(historyPage, true);
+});
+
+loadSummary(currentPeriod);
+loadHistory(1);
+
+// autoreferhs
+setInterval(() => {
+  loadSummary(currentPeriod);
+  if (historyPage === 1) loadHistory(1);
+}, 60_000);
+</script>
+</body>
+</html>
