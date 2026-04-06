@@ -55,6 +55,24 @@ def record_play(track: dict):
     conn.close()
     logger.info(f"Stats: play recorded — {track.get('artist')} – {track.get('title')}")
 
+def delete_play(play_id: int) -> bool:
+    """Delete a single play entry. Returns True if a row was deleted."""
+    conn = get_conn()
+    cur = conn.execute("DELETE FROM plays WHERE id = ?", (play_id,))
+    affected = cur.rowcount
+    conn.commit()
+    conn.close()
+    return affected > 0
+
+def clear_history() -> int:
+    """Delete all play entries. Returns the number of rows deleted."""
+    conn = get_conn()
+    cur = conn.execute("DELETE FROM plays")
+    count = cur.rowcount
+    conn.commit()
+    conn.close()
+    return count
+
 def start_session() -> int:
     conn = get_conn()
     cur = conn.execute("INSERT INTO sessions (start_time) VALUES (?)", (int(time.time()),))
@@ -95,7 +113,6 @@ def get_summary(period: str = "all") -> dict:
     cutoff = _period_cutoff(period)
     conn = get_conn()
 
-    # Top artists
     top_artists = conn.execute(
         """
         SELECT artist, COUNT(*) as plays, cover_url
@@ -108,7 +125,6 @@ def get_summary(period: str = "all") -> dict:
         (cutoff,),
     ).fetchall()
 
-    # Top albums
     top_albums = conn.execute(
         """
         SELECT album, artist, COUNT(*) as plays, cover_url
@@ -121,7 +137,6 @@ def get_summary(period: str = "all") -> dict:
         (cutoff,),
     ).fetchall()
 
-    # Top tracks
     top_tracks = conn.execute(
         """
         SELECT title, artist, album, COUNT(*) as plays, cover_url
@@ -134,7 +149,6 @@ def get_summary(period: str = "all") -> dict:
         (cutoff,),
     ).fetchall()
 
-    # Genre breakdown
     genres = conn.execute(
         """
         SELECT genre, COUNT(*) as plays
@@ -147,12 +161,10 @@ def get_summary(period: str = "all") -> dict:
         (cutoff,),
     ).fetchall()
 
-    # Total plays
     total_plays = conn.execute(
         "SELECT COUNT(*) as c FROM plays WHERE timestamp >= ?", (cutoff,)
     ).fetchone()["c"]
 
-    # Total listening time (from sessions)
     sessions = conn.execute(
         """
         SELECT start_time, end_time FROM sessions
@@ -165,13 +177,13 @@ def get_summary(period: str = "all") -> dict:
     conn.close()
 
     return {
-        "period": period,
-        "total_plays": total_plays,
+        "period":       period,
+        "total_plays":  total_plays,
         "total_seconds": total_seconds,
-        "top_artists": [dict(r) for r in top_artists],
-        "top_albums":  [dict(r) for r in top_albums],
-        "top_tracks":  [dict(r) for r in top_tracks],
-        "genres":      [dict(r) for r in genres],
+        "top_artists":  [dict(r) for r in top_artists],
+        "top_albums":   [dict(r) for r in top_albums],
+        "top_tracks":   [dict(r) for r in top_tracks],
+        "genres":       [dict(r) for r in genres],
     }
 
 def get_history(page: int = 1, limit: int = 50) -> dict:
@@ -189,7 +201,7 @@ def get_history(page: int = 1, limit: int = 50) -> dict:
     total = conn.execute("SELECT COUNT(*) as c FROM plays").fetchone()["c"]
     conn.close()
     return {
-        "page": page,
+        "page":  page,
         "limit": limit,
         "total": total,
         "plays": [dict(r) for r in rows],
