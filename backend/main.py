@@ -1,23 +1,24 @@
-#ZamudioScrobbler/backend/main.py
+# backend/main.py
 import asyncio
+import hashlib
 import os
 import re
 import time
+
+import sounddevice as sd
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from audio import record_chunk, has_audio
-from shazam_service import identify
-from lastfm_service import scrobble
+from config import cfg
+from lastfm_service import scrobble, init_network, test_credentials
+from logger import logger
+from state import state
 from stats_service import (
     init_db, record_play, start_session, end_session,
     get_summary, get_history, delete_play, clear_history,
 )
-from state import state
-from config import SAMPLE_RATE, RETRY_DELAY, SILENCE_TIMEOUT
-from logger import logger
-
 
 app = FastAPI(title="VinylScrobbler")
 
@@ -27,11 +28,6 @@ if os.path.isdir(STATS_WEB_DIR):
 
 clients: set = set()
 
-# ── Track deduplication ───────────────────────────────────────────────────────
-
-# Strips trailing parenthetical/bracketed metadata:
-#   (2011 Remaster) · (Remastered) · (Live at Wembley) · (Acoustic Version)
-#   (Radio Edit) · (Instrumental) · (feat. Someone) · (2024) · [Deluxe Edition] …
 _SUFFIX_PARENS = re.compile(
     r"\s*[\(\[][^\)\]]*"
     r"(remaster(?:ed)?|live|version|edit|radio|acoustic|demo|"
@@ -42,8 +38,6 @@ _SUFFIX_PARENS = re.compile(
     re.IGNORECASE,
 )
 
-# Strips trailing dash-separated metadata (no parens):
-#   - Live · - Remastered · - Acoustic · - Radio Edit …
 _SUFFIX_DASH = re.compile(
     r"\s*[\-–]\s*"
     r"(remaster(?:ed)?|live|version|edit|radio|acoustic|"
@@ -52,13 +46,11 @@ _SUFFIX_DASH = re.compile(
     re.IGNORECASE,
 )
 
+
 def _normalize_title(title: str) -> str:
-    """Strip variant suffixes (remaster, live, instrumental, year…) and lowercase."""
     if not title:
         return ""
     t = title.strip()
-    # Apply in a loop: a title can have multiple stacked suffixes,
-    # e.g. "Song (Live) (2011 Remaster)" → strip both
     while True:
         stripped = _SUFFIX_PARENS.sub("", t).strip()
         stripped = _SUFFIX_DASH.sub("", stripped).strip()
@@ -67,8 +59,8 @@ def _normalize_title(title: str) -> str:
         t = stripped
     return t.lower()
 
+
 def _track_norm_key(track: dict) -> tuple:
-    """Return a normalized (artist, title) key for dedup comparison."""
     artist = (track.get("artist") or "").strip().lower()
     title  = _normalize_title(track.get("title") or "")
     return (artist, title)
@@ -90,6 +82,7 @@ async def websocket_endpoint(ws: WebSocket):
         clients.discard(ws)
         logger.info("WebSocket client disconnected")
 
+
 async def broadcast(data: dict):
     dead = []
     for ws in clients:
@@ -108,19 +101,21 @@ async def serve_stats_page():
     path = os.path.join(STATS_WEB_DIR, "index.html")
     return FileResponse(path)
 
+
 @app.get("/api/now")
 async def now_playing():
     return {"status": state.status, "track": state.current_track}
+
 
 @app.get("/api/detection")
 async def detection_status():
     return {"enabled": state.detection_enabled}
 
+
 @app.post("/api/detection/toggle")
 async def toggle_detection():
     state.detection_enabled = not state.detection_enabled
     if not state.detection_enabled:
-        # Transition to idle immediately
         if state.status != "idle":
             state.status        = "idle"
             state.current_track = None
@@ -134,6 +129,90 @@ async def toggle_detection():
     return {"enabled": state.detection_enabled}
 
 
+# ── Setup / Config API ────────────────────────────────────────────────────────
+
+@app.get("/api/setup/status")
+async def setup_status():
+    """Used by the web UI to decide whether to show the setup wizard."""
+    configured = cfg.is_configured()
+    lastfm_ok  = False
+    if configured:
+        result = test_credentials(
+            cfg.LASTFM_API_KEY,
+            cfg.LASTFM_API_SECRET,
+            cfg.LASTFM_USERNAME,
+            cfg.LASTFM_PASSWORD_HASH,
+        )
+        lastfm_ok = result["ok"]
+    return {
+        "configured":     configured,
+        "lastfm_ok":      lastfm_ok,
+        "setup_required": not configured,
+        "audio_device":   cfg.AUDIO_DEVICE_INDEX,
+        "username":       cfg.LASTFM_USERNAME if configured else "",
+    }
+
+
+@app.get("/api/config")
+async def get_config():
+    """Return current config with sensitive fields masked."""
+    return cfg.to_public()
+
+
+@app.post("/api/config")
+async def update_config(data: dict):
+    """Save config updates. Accepts LASTFM_PASSWORD (plaintext) → auto-hashed."""
+    try:
+        cfg.save(data)
+        init_network()          # re-connect Last.fm with new creds
+        return {"ok": True}
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
+
+
+@app.get("/api/devices")
+async def list_audio_devices():
+    """List available audio input devices."""
+    devices = []
+    for i, d in enumerate(sd.query_devices()):
+        if d["max_input_channels"] > 0:
+            devices.append({
+                "index":    i,
+                "name":     d["name"],
+                "channels": d["max_input_channels"],
+                "default":  d.get("default_samplerate", 44100),
+            })
+    return {"devices": devices, "current": cfg.AUDIO_DEVICE_INDEX}
+
+
+@app.post("/api/lastfm/test")
+async def test_lastfm(data: dict):
+    """Validate Last.fm credentials before saving.
+    Accepts {api_key, api_secret, username, password}.
+    Returns {ok, error?, username?, password_hash?}.
+    """
+    api_key    = (data.get("api_key")    or "").strip()
+    api_secret = (data.get("api_secret") or "").strip()
+    username   = (data.get("username")   or "").strip()
+    password   = (data.get("password")   or "")
+
+    if not all([api_key, api_secret, username, password]):
+        return JSONResponse(
+            {"ok": False, "error": "All fields are required"},
+            status_code=400,
+        )
+
+    password_hash = hashlib.md5(password.encode()).hexdigest()
+    result = test_credentials(api_key, api_secret, username, password_hash)
+
+    if result["ok"]:
+        result["password_hash"] = password_hash
+        result["username"]      = username
+
+    return result
+
+
+# stats
 @app.get("/api/stats/summary")
 async def stats_summary(period: str = "week"):
     allowed = {"today", "week", "month", "year", "all"}
@@ -141,30 +220,30 @@ async def stats_summary(period: str = "week"):
         return JSONResponse({"error": "invalid period"}, status_code=400)
     return get_summary(period)
 
+
 @app.get("/api/stats/history")
 async def stats_history(page: int = 1, limit: int = 50):
     if limit > 200:
         limit = 200
     return get_history(page, limit)
 
+
 @app.delete("/api/history/{play_id}")
 async def delete_play_entry(play_id: int):
-    """Delete a single play entry by ID."""
     ok = delete_play(play_id)
     if not ok:
         return JSONResponse({"error": "not found"}, status_code=404)
     logger.info(f"Deleted play entry id={play_id}")
     return {"deleted": play_id}
 
+
 @app.delete("/api/history")
 async def clear_all_history():
-    """Delete all play history."""
     count = clear_history()
     logger.info(f"Cleared all history ({count} entries)")
     return {"deleted": count}
 
 
-# ── Detection loop ────────────────────────────────────────────────────────────
 
 async def detection_loop():
     silence_start = None
@@ -174,17 +253,21 @@ async def detection_loop():
             await asyncio.sleep(1)
             continue
 
+        if not cfg.is_configured():
+            await asyncio.sleep(5)
+            continue
+
         audio = record_chunk()
 
         if has_audio(audio):
             silence_start = None
 
-            track = await identify(audio, SAMPLE_RATE)
+            from shazam_service import identify
+            track = await identify(audio, cfg.SAMPLE_RATE)
             if track:
                 norm_key = _track_norm_key(track)
 
                 if norm_key != state.last_norm_key:
-                    # Genuinely new track (or first detection after silence)
                     state.current_track  = track
                     state.last_norm_key  = norm_key
 
@@ -194,7 +277,6 @@ async def detection_loop():
                     record_play(track)
                     scrobble(track)
                 else:
-                    # Same track (possibly detected as instrumental variant) — skip
                     logger.info(
                         f"Dedup: skipping re-detection of "
                         f"{track.get('artist')} – {track.get('title')}"
@@ -203,7 +285,7 @@ async def detection_loop():
                 state.status = "playing"
                 await broadcast({"status": "playing", "track": state.current_track})
 
-            await asyncio.sleep(RETRY_DELAY)
+            await asyncio.sleep(cfg.RETRY_DELAY)
 
         else:
             if silence_start is None:
@@ -212,14 +294,12 @@ async def detection_loop():
             silence_elapsed = int(time.time() - silence_start)
             logger.info(f"Silence: {silence_elapsed}s")
 
-            if silence_elapsed > SILENCE_TIMEOUT and state.status != "idle":
+            if silence_elapsed > cfg.SILENCE_TIMEOUT and state.status != "idle":
                 state.status           = "idle"
                 state.current_track    = None
-                state.last_norm_key    = None  # reset dedup key on silence
-
+                state.last_norm_key    = None
                 end_session(state.current_session_id)
                 state.current_session_id = None
-
                 await broadcast({"status": "idle"})
 
             await asyncio.sleep(1)
@@ -228,5 +308,6 @@ async def detection_loop():
 @app.on_event("startup")
 async def startup():
     init_db()
+    init_network()
     asyncio.create_task(detection_loop())
     logger.info("VinylScrobbler backend started (headless mode)")

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -58,10 +58,8 @@ body::after {
   z-index: 0;
 }
 
-/* ── Header / Now Playing ── */
-#nowHero {
-  position: sticky; top: 0; z-index: 90;
-}
+/* ── Header ── */
+#nowHero { position: sticky; top: 0; z-index: 90; }
 
 .hero-bar {
   display: flex; align-items: center;
@@ -78,59 +76,52 @@ body::after {
   display: flex; align-items: center; gap: 10px;
   font-size: 13px; font-weight: 800;
   letter-spacing: .12em; text-transform: uppercase;
-  color: var(--text);
-  flex-shrink: 0;
-  text-decoration: none;
+  color: var(--text); flex-shrink: 0; text-decoration: none;
 }
 .logo-vinyl {
-  width: 26px; height: 26px;
-  border-radius: 50%;
+  width: 26px; height: 26px; border-radius: 50%;
   background: conic-gradient(from 0deg, #18181c 0%, #28282e 25%, #18181c 50%, #28282e 75%, #18181c 100%);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .logo-vinyl::after {
-  content: "";
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 6px var(--accent);
+  content: ""; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 6px var(--accent);
 }
 .logo-vinyl.spinning { animation: spin 2s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.hero-now {
-  flex: 1; min-width: 0;
-  display: flex; align-items: center; gap: 9px;
-}
+.hero-now { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; }
 .hero-dot {
   width: 6px; height: 6px; border-radius: 50%;
-  background: var(--text3); flex-shrink: 0;
-  transition: background .4s, box-shadow .4s;
+  background: var(--text3); flex-shrink: 0; transition: background .4s, box-shadow .4s;
 }
 .hero-dot.live {
-  background: var(--green);
-  box-shadow: 0 0 7px var(--green);
+  background: var(--green); box-shadow: 0 0 7px var(--green);
   animation: livepulse 1.6s ease-in-out infinite;
 }
 @keyframes livepulse { 0%,100%{opacity:1} 50%{opacity:.25} }
 
 .hero-nowtext {
-  font-size: 12px; font-weight: 500;
-  color: var(--text3);
+  font-size: 12px; font-weight: 500; color: var(--text3);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  transition: color .4s;
-  letter-spacing: .02em;
+  transition: color .4s; letter-spacing: .02em;
 }
 .hero-nowtext.live { color: var(--text2); }
 
+/* Settings button */
+.btn-settings {
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 1px solid var(--border2); background: var(--surface2);
+  color: var(--text3); font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all .18s;
+}
+.btn-settings:hover { border-color: var(--text3); color: var(--text); background: var(--surface3); }
+
 .det-toggle {
   display: flex; align-items: center; gap: 8px;
-  font-size: 10px; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase;
-  color: var(--text3);
-  user-select: none; flex-shrink: 0;
-  transition: color .2s;
+  font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text3); user-select: none; flex-shrink: 0; transition: color .2s;
 }
 .det-toggle.active { color: var(--green); }
 .switch { position: relative; width: 34px; height: 18px; flex-shrink: 0; }
@@ -138,31 +129,25 @@ body::after {
 .slider {
   position: absolute; inset: 0;
   background: var(--surface3); border: 1px solid var(--border2);
-  border-radius: 18px; cursor: pointer;
-  transition: all .25s;
+  border-radius: 18px; cursor: pointer; transition: all .25s;
 }
 .slider::before {
-  content: "";
-  position: absolute;
+  content: ""; position: absolute;
   width: 12px; height: 12px; left: 2px; top: 2px;
-  border-radius: 50%; background: var(--text3);
-  transition: transform .25s, background .25s;
+  border-radius: 50%; background: var(--text3); transition: transform .25s, background .25s;
 }
 .switch input:checked + .slider { background: var(--green-lo); border-color: var(--green); }
 .switch input:checked + .slider::before { transform: translateX(16px); background: var(--green); }
 
-/* Now Playing expanded */
 .hero-expanded {
   max-height: 0; overflow: hidden;
-  transition: max-height .5s cubic-bezier(.22,1,.36,1);
-  position: relative;
+  transition: max-height .5s cubic-bezier(.22,1,.36,1); position: relative;
 }
 .hero-expanded.open { max-height: 160px; }
 .hero-cover-bg {
   position: absolute; inset: 0;
   background-size: cover; background-position: center;
-  filter: blur(50px) brightness(.25) saturate(2.5);
-  transform: scale(1.15);
+  filter: blur(50px) brightness(.25) saturate(2.5); transform: scale(1.15);
 }
 .hero-content {
   position: relative; z-index: 1;
@@ -170,304 +155,535 @@ body::after {
   padding: 16px 28px;
   border-bottom: 1px solid rgba(255,255,255,.04);
 }
-.hero-art {
-  width: 90px; height: 90px;
-  border-radius: 9px; object-fit: cover;
-  box-shadow: 0 8px 32px rgba(0,0,0,.7);
-  flex-shrink: 0; background: var(--surface3);
-}
+.hero-art { width: 90px; height: 90px; border-radius: 9px; object-fit: cover; box-shadow: 0 8px 32px rgba(0,0,0,.7); flex-shrink: 0; background: var(--surface3); }
 .hero-info { min-width: 0; }
-.hero-info .now-label {
-  font-size: 9px; font-weight: 700; letter-spacing: .18em;
-  text-transform: uppercase; color: var(--accent); margin-bottom: 5px;
-}
-.hero-info .now-title {
-  font-family: "Cormorant Garamond", serif;
-  font-size: 26px; font-weight: 600; line-height: 1.1;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.hero-info .now-artist {
-  font-size: 13px; color: var(--text2); margin-top: 3px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.hero-info .now-album {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 11px; color: var(--text3); margin-top: 5px;
-}
+.hero-info .now-label { font-size: 9px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
+.hero-info .now-title { font-family: "Cormorant Garamond", serif; font-size: 26px; font-weight: 600; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero-info .now-artist { font-size: 13px; color: var(--text2); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero-info .now-album { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--text3); margin-top: 5px; }
 
 /* ── Main layout ── */
-main {
-  max-width: 1160px;
-  margin: 0 auto;
-  padding: 36px 24px 100px;
-  position: relative; z-index: 1;
-}
+main { max-width: 1160px; margin: 0 auto; padding: 36px 24px 100px; position: relative; z-index: 1; }
 
-/* Period tabs */
-.period-bar {
-  display: flex; gap: 0;
-  margin-bottom: 36px;
-  border-bottom: 1px solid var(--border);
-}
+.period-bar { display: flex; gap: 0; margin-bottom: 36px; border-bottom: 1px solid var(--border); }
 .period-btn {
-  padding: 8px 16px 10px;
-  border: none; border-bottom: 2px solid transparent;
-  background: transparent; color: var(--text3);
-  font-family: "Syne", sans-serif;
-  font-size: 10px; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase;
-  cursor: pointer;
-  transition: color .2s, border-color .2s;
-  margin-bottom: -1px;
+  padding: 8px 16px 10px; border: none; border-bottom: 2px solid transparent;
+  background: transparent; color: var(--text3); font-family: "Syne", sans-serif;
+  font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  cursor: pointer; transition: color .2s, border-color .2s; margin-bottom: -1px;
 }
 .period-btn:hover { color: var(--text2); }
 .period-btn.active { color: var(--text); border-bottom-color: var(--accent); }
 
-/* Summary grid */
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px; margin-bottom: 36px;
-}
+.summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 36px; }
 @media (max-width: 700px) { .summary-grid { grid-template-columns: 1fr 1fr; } }
 
 .stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 22px 20px;
-  position: relative; overflow: hidden;
-  transition: border-color .25s, transform .25s;
-  animation: fadeUp .5s ease both;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+  padding: 22px 20px; position: relative; overflow: hidden;
+  transition: border-color .25s, transform .25s; animation: fadeUp .5s ease both;
 }
 .stat-card:hover { border-color: var(--border2); transform: translateY(-2px); }
-.stat-card::after {
-  content: "";
-  position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.05), transparent);
-}
-.stat-card:nth-child(1) { animation-delay:.05s }
-.stat-card:nth-child(2) { animation-delay:.10s }
-.stat-card:nth-child(3) { animation-delay:.15s }
-.stat-card:nth-child(4) { animation-delay:.20s }
-.stat-label {
-  font-size: 9px; font-weight: 700; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--text3); margin-bottom: 10px;
-}
-.stat-value {
-  font-size: 40px; font-weight: 800; line-height: 1; letter-spacing: -.03em;
-}
+.stat-card::after { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.05), transparent); }
+.stat-card:nth-child(1){animation-delay:.05s}.stat-card:nth-child(2){animation-delay:.10s}.stat-card:nth-child(3){animation-delay:.15s}.stat-card:nth-child(4){animation-delay:.20s}
+.stat-label { font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+.stat-value { font-size: 40px; font-weight: 800; line-height: 1; letter-spacing: -.03em; }
 
-/* Content grids */
-.grid-3 {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px; margin-bottom: 10px;
-}
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px; margin-bottom: 10px;
-}
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
 @media (max-width: 960px) { .grid-3 { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 700px) { .grid-3, .grid-2 { grid-template-columns: 1fr; } }
 
-/* Card */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  overflow: hidden;
-  position: relative;
-  animation: fadeUp .5s ease both;
-  animation-delay: .2s;
-}
-.card::after {
-  content: "";
-  position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.04), transparent);
-  pointer-events: none;
-}
-.card-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 18px 12px;
-  border-bottom: 1px solid var(--border);
-}
-.card-head h2 {
-  font-size: 9px; font-weight: 700;
-  letter-spacing: .14em; text-transform: uppercase; color: var(--text3);
-}
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; position: relative; animation: fadeUp .5s ease both; animation-delay: .2s; }
+.card::after { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.04), transparent); pointer-events: none; }
+.card-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px 12px; border-bottom: 1px solid var(--border); }
+.card-head h2 { font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text3); }
 
-/* Ranked list */
-.rank-item {
-  display: flex; align-items: center; gap: 11px;
-  padding: 7px 16px;
-  transition: background .12s;
-}
+.rank-item { display: flex; align-items: center; gap: 11px; padding: 7px 16px; transition: background .12s; }
 .rank-item:hover { background: var(--surface2); }
-.rank-num {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10px; color: var(--text3);
-  width: 16px; text-align: right; flex-shrink: 0;
-}
-.rank-cover {
-  width: 36px; height: 36px;
-  border-radius: 6px; object-fit: cover;
-  background: var(--surface3); flex-shrink: 0;
-}
+.rank-num { font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--text3); width: 16px; text-align: right; flex-shrink: 0; }
+.rank-cover { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; background: var(--surface3); flex-shrink: 0; }
 .rank-cover.circle { border-radius: 50%; }
 .rank-info { flex: 1; min-width: 0; }
-.rank-name {
-  font-size: 13px; font-weight: 600;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.rank-sub {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10px; color: var(--text3); margin-top: 2px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.rank-plays {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10px; color: var(--text3); flex-shrink: 0;
-}
+.rank-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank-sub { font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank-plays { font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--text3); flex-shrink: 0; }
 
-/* Genres */
 .genre-list { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 11px; }
-.genre-label {
-  display: flex; justify-content: space-between; align-items: baseline;
-  margin-bottom: 4px;
-}
+.genre-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
 .genre-label span:first-child { font-size: 12px; font-weight: 600; }
-.genre-label span:last-child {
-  font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--text3);
-}
+.genre-label span:last-child { font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--text3); }
 .genre-track { height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
-.genre-fill {
-  height: 100%; border-radius: 2px; width: 0%;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  transition: width .9s cubic-bezier(.22,1,.36,1);
-}
+.genre-fill { height: 100%; border-radius: 2px; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width .9s cubic-bezier(.22,1,.36,1); }
 
-/* Quick stats */
-.qs-item {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-}
+.qs-item { padding: 12px 16px; border-bottom: 1px solid var(--border); }
 .qs-item:last-child { border-bottom: none; }
-.qs-label {
-  font-size: 9px; font-weight: 700; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--text3); margin-bottom: 3px;
-}
-.qs-val {
-  font-size: 14px; font-weight: 600;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
+.qs-label { font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); margin-bottom: 3px; }
+.qs-val { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* History */
 .history-section { margin-top: 10px; }
-.history-head {
-  padding: 0 2px; margin-bottom: 10px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.history-head h2 {
-  font-size: 9px; font-weight: 700;
-  letter-spacing: .14em; text-transform: uppercase; color: var(--text3);
-}
+.history-head { padding: 0 2px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+.history-head h2 { font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text3); }
+.history-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; position: relative; }
+.history-card::after { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.04), transparent); pointer-events: none; }
 
-.history-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  overflow: hidden;
-  position: relative;
-}
-.history-card::after {
-  content: "";
-  position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.04), transparent);
-  pointer-events: none;
-}
-
-.h-row {
-  display: grid;
-  grid-template-columns: 42px 1fr minmax(0,160px) auto 90px 28px;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 14px;
-  border-bottom: 1px solid var(--border);
-  transition: background .12s;
-}
+.h-row { display: grid; grid-template-columns: 42px 1fr minmax(0,160px) auto 90px 28px; align-items: center; gap: 10px; padding: 9px 14px; border-bottom: 1px solid var(--border); transition: background .12s; }
 .h-row:last-child { border-bottom: none; }
 .h-row:hover { background: var(--surface2); }
-@media (max-width: 700px) {
-  .h-row { grid-template-columns: 38px 1fr auto 28px; }
-  .h-album, .h-badge-wrap { display: none; }
-}
-
-.h-art {
-  width: 36px; height: 36px;
-  border-radius: 6px; object-fit: cover;
-  background: var(--surface3); flex-shrink: 0;
-}
+@media (max-width: 700px) { .h-row { grid-template-columns: 38px 1fr auto 28px; } .h-album, .h-badge-wrap { display: none; } }
+.h-art { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; background: var(--surface3); flex-shrink: 0; }
 .h-info { min-width: 0; }
 .h-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.h-artist {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10px; color: var(--text3); margin-top: 2px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.h-album {
-  font-size: 11px; color: var(--text3);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.h-badge {
-  display: inline-block;
-  padding: 2px 8px; border-radius: 100px;
-  background: var(--surface3); border: 1px solid var(--border2);
-  font-size: 9px; font-weight: 700; letter-spacing: .06em;
-  color: var(--text3); white-space: nowrap;
-}
-.h-time {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10px; color: var(--text3); white-space: nowrap;
-}
-.btn-del {
-  width: 24px; height: 24px; border-radius: 5px;
-  border: none; background: transparent; color: var(--text3);
-  font-size: 12px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; transition: background .15s, color .15s, opacity .15s;
-}
+.h-artist { font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.h-album { font-size: 11px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.h-badge { display: inline-block; padding: 2px 8px; border-radius: 100px; background: var(--surface3); border: 1px solid var(--border2); font-size: 9px; font-weight: 700; letter-spacing: .06em; color: var(--text3); white-space: nowrap; }
+.h-time { font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--text3); white-space: nowrap; }
+.btn-del { width: 24px; height: 24px; border-radius: 5px; border: none; background: transparent; color: var(--text3); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: background .15s, color .15s, opacity .15s; }
 .h-row:hover .btn-del { opacity: 1; }
 .btn-del:hover { background: var(--accent-md); color: var(--accent2); }
 
-/* Load more */
 .load-more-wrap { text-align: center; margin-top: 18px; }
-.btn-ghost {
-  padding: 8px 28px; border: 1px solid var(--border2);
-  border-radius: 100px; background: transparent;
-  color: var(--text3);
-  font-family: "Syne", sans-serif; font-size: 10px; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase;
-  cursor: pointer; transition: all .2s;
-}
+.btn-ghost { padding: 8px 28px; border: 1px solid var(--border2); border-radius: 100px; background: transparent; color: var(--text3); font-family: "Syne", sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: all .2s; }
 .btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+.empty { text-align: center; padding: 32px; color: var(--text3); font-size: 11px; font-family: "JetBrains Mono", monospace; letter-spacing: .04em; }
 
-.empty {
-  text-align: center; padding: 32px;
-  color: var(--text3); font-size: 11px;
-  font-family: "JetBrains Mono", monospace; letter-spacing: .04em;
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ═══════════════════════════════════════════════════════════════
+   SETUP WIZARD
+   ═══════════════════════════════════════════════════════════════ */
+
+.wizard-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(8,8,9,.92);
+  backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s;
+}
+.wizard-overlay.open { opacity: 1; pointer-events: all; }
+
+.wizard-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  width: 100%; max-width: 480px;
+  padding: 36px;
+  position: relative;
+  box-shadow: 0 32px 80px rgba(0,0,0,.6);
+  animation: fadeUp .4s ease both;
 }
 
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+.wizard-step { display: none; }
+.wizard-step.active { display: block; }
+
+.wizard-vinyl-icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: conic-gradient(from 0deg, #18181c 0%, #2a2a31 25%, #18181c 50%, #2a2a31 75%, #18181c 100%);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+  box-shadow: 0 0 0 1px var(--border2), 0 0 24px rgba(232,20,62,.15);
 }
+.wizard-vinyl-icon::after {
+  content: ""; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 10px var(--accent);
+}
+
+.wizard-eyebrow {
+  font-size: 9px; font-weight: 700; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--accent);
+  text-align: center; margin-bottom: 8px;
+}
+.wizard-title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 28px; font-weight: 600; text-align: center;
+  line-height: 1.15; margin-bottom: 12px;
+}
+.wizard-desc {
+  font-size: 13px; color: var(--text2); text-align: center;
+  line-height: 1.6; margin-bottom: 28px;
+}
+
+.wz-progress {
+  display: flex; gap: 6px; justify-content: center; margin-bottom: 32px;
+}
+.wz-dot {
+  width: 28px; height: 3px; border-radius: 2px;
+  background: var(--surface3); transition: background .3s;
+}
+.wz-dot.done { background: var(--accent); }
+.wz-dot.active { background: var(--accent2); }
+
+/* Form elements shared by wizard + settings */
+.field { margin-bottom: 16px; }
+.field label {
+  display: block; font-size: 9px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 7px;
+}
+.field input, .field select {
+  width: 100%; padding: 10px 13px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 9px; color: var(--text);
+  font-family: "JetBrains Mono", monospace; font-size: 13px;
+  outline: none; transition: border-color .2s;
+  appearance: none;
+}
+.field input:focus, .field select:focus { border-color: var(--accent); }
+.field input::placeholder { color: var(--text3); }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.field-hint {
+  font-size: 11px; color: var(--text3); margin-top: 5px; line-height: 1.5;
+}
+.field-hint a { color: var(--accent2); text-decoration: none; }
+.field-hint a:hover { text-decoration: underline; }
+
+.wz-btn {
+  width: 100%; padding: 12px; border-radius: 10px;
+  border: none; cursor: pointer;
+  font-family: "Syne", sans-serif; font-size: 13px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  transition: all .18s;
+}
+.wz-btn-primary {
+  background: var(--accent); color: #fff;
+}
+.wz-btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+.wz-btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.wz-btn-ghost {
+  background: transparent; color: var(--text3);
+  border: 1px solid var(--border2); margin-top: 8px;
+}
+.wz-btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+
+.wz-error {
+  background: rgba(232,20,62,.08); border: 1px solid rgba(232,20,62,.25);
+  border-radius: 9px; padding: 10px 13px;
+  font-size: 12px; color: var(--accent2);
+  margin-bottom: 14px; display: none;
+}
+.wz-error.show { display: block; }
+
+.wz-success-icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--green-lo); border: 1px solid rgba(34,197,94,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; margin: 0 auto 24px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SETTINGS PANEL
+   ═══════════════════════════════════════════════════════════════ */
+
+.settings-overlay {
+  position: fixed; inset: 0; z-index: 150;
+  background: rgba(8,8,9,.6);
+  backdrop-filter: blur(4px);
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s;
+}
+.settings-overlay.open { opacity: 1; pointer-events: all; }
+
+.settings-panel {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 151;
+  width: 380px; max-width: 100vw;
+  background: var(--surface);
+  border-left: 1px solid var(--border2);
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform .3s cubic-bezier(.22,1,.36,1);
+}
+.settings-panel.open { transform: translateX(0); }
+
+.settings-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.settings-header h2 {
+  font-size: 11px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text);
+}
+.btn-close {
+  width: 28px; height: 28px; border-radius: 7px;
+  border: 1px solid var(--border2); background: var(--surface2);
+  color: var(--text3); font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.btn-close:hover { border-color: var(--text3); color: var(--text); }
+
+.settings-body { flex: 1; overflow-y: auto; padding: 24px; }
+.settings-body::-webkit-scrollbar { width: 4px; }
+.settings-body::-webkit-scrollbar-track { background: transparent; }
+.settings-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.settings-section { margin-bottom: 28px; }
+.settings-section-label {
+  font-size: 8px; font-weight: 700; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--accent);
+  margin-bottom: 14px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-status {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: var(--text3);
+  padding: 8px 0 14px;
+}
+.settings-status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+.settings-status-dot.ok { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.settings-status-dot.warn { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+
+.settings-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.btn-save {
+  width: 100%; padding: 10px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 9px;
+  font-family: "Syne", sans-serif; font-size: 12px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  cursor: pointer; transition: all .18s;
+}
+.btn-save:hover { background: var(--accent2); }
+.btn-save:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════════════ */
+
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 300; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast {
+  padding: 11px 16px; border-radius: 10px;
+  font-size: 12px; font-weight: 600;
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  animation: toastIn .25s ease both;
+  max-width: 280px;
+}
+.toast.success { border-color: rgba(34,197,94,.3); color: var(--green); }
+.toast.error   { border-color: rgba(232,20,62,.3); color: var(--accent2); }
+@keyframes toastIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+@keyframes toastOut { from { opacity:1; } to { opacity:0; transform: translateY(6px); } }
+
+/* ── Warning banner ── */
+.config-warning {
+  background: rgba(245,158,11,.07); border-bottom: 1px solid rgba(245,158,11,.2);
+  padding: 10px 28px; font-size: 12px; color: #f59e0b;
+  display: none; align-items: center; gap: 10px;
+}
+.config-warning.show { display: flex; }
+.config-warning a { color: inherit; font-weight: 700; cursor: pointer; text-decoration: underline; }
 </style>
 </head>
 <body>
 
+<div class="wizard-overlay" id="wizardOverlay">
+  <div class="wizard-box">
+
+    <div class="wizard-step active" id="wz0">
+      <div class="wizard-vinyl-icon"></div>
+      <div class="wizard-eyebrow">Welcome</div>
+      <div class="wizard-title">Let's set up VinylScrobbler</div>
+      <div class="wizard-desc">
+        VinylScrobbler listens to your turntable, identifies songs with Shazam,
+        and scrobbles them to Last.fm — automatically.<br><br>
+        You'll need a <strong>Last.fm API account</strong> (free) and your
+        <strong>audio input device</strong> ready. Takes about 2 minutes.
+      </div>
+      <div class="wz-progress">
+        <div class="wz-dot active"></div>
+        <div class="wz-dot"></div>
+        <div class="wz-dot"></div>
+        <div class="wz-dot"></div>
+      </div>
+      <button class="wz-btn wz-btn-primary" onclick="wzGo(1)">Get started →</button>
+    </div>
+
+    <div class="wizard-step" id="wz1">
+      <div class="wizard-eyebrow">Step 1 of 3</div>
+      <div class="wizard-title">Last.fm API Keys</div>
+      <div class="wizard-desc">Create a free API application on Last.fm to get your keys.</div>
+      <div class="wz-progress">
+        <div class="wz-dot done"></div>
+        <div class="wz-dot active"></div>
+        <div class="wz-dot"></div>
+        <div class="wz-dot"></div>
+      </div>
+      <div class="field-hint" style="margin-bottom:18px">
+        Don't have API keys yet? <a href="https://www.last.fm/api/account/create" target="_blank">Create a Last.fm API account →</a>
+        (Application name can be anything, e.g. "VinylScrobbler")
+      </div>
+      <div class="wz-error" id="wz1Error"></div>
+      <div class="field">
+        <label>API Key</label>
+        <input type="text" id="wz1Key" placeholder="abcdef1234567890..." autocomplete="off">
+      </div>
+      <div class="field">
+        <label>API Secret</label>
+        <input type="password" id="wz1Secret" placeholder="••••••••••••••••" autocomplete="off">
+      </div>
+      <button class="wz-btn wz-btn-primary" id="wz1Btn" onclick="wzStep1()">Continue →</button>
+      <button class="wz-btn wz-btn-ghost" onclick="wzGo(0)">← Back</button>
+    </div>
+
+    <div class="wizard-step" id="wz2">
+      <div class="wizard-eyebrow">Step 2 of 3</div>
+      <div class="wizard-title">Your Last.fm Account</div>
+      <div class="wizard-desc">Enter the credentials for the account that will receive your scrobbles.</div>
+      <div class="wz-progress">
+        <div class="wz-dot done"></div>
+        <div class="wz-dot done"></div>
+        <div class="wz-dot active"></div>
+        <div class="wz-dot"></div>
+      </div>
+      <div class="wz-error" id="wz2Error"></div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="wz2User" placeholder="your_lastfm_username" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="wz2Pass" placeholder="••••••••" autocomplete="current-password">
+        <div class="field-hint">Your password is hashed locally (MD5) before being sent. It is never stored in plaintext.</div>
+      </div>
+      <button class="wz-btn wz-btn-primary" id="wz2Btn" onclick="wzStep2()">Verify & continue →</button>
+      <button class="wz-btn wz-btn-ghost" onclick="wzGo(1)">← Back</button>
+    </div>
+    <div class="wizard-step" id="wz3">
+      <div class="wizard-eyebrow">Step 3 of 3</div>
+      <div class="wizard-title">Audio Input</div>
+      <div class="wizard-desc">Select the audio device connected to your turntable or mixer.</div>
+      <div class="wz-progress">
+        <div class="wz-dot done"></div>
+        <div class="wz-dot done"></div>
+        <div class="wz-dot done"></div>
+        <div class="wz-dot active"></div>
+      </div>
+      <div class="wz-error" id="wz3Error"></div>
+      <div class="field">
+        <label>Audio Input Device</label>
+        <select id="wz3Device"><option value="">Loading devices…</option></select>
+      </div>
+      <button class="wz-btn wz-btn-primary" id="wz3Btn" onclick="wzStep3()">Finish setup →</button>
+      <button class="wz-btn wz-btn-ghost" onclick="wzGo(2)">← Back</button>
+    </div>
+
+    <div class="wizard-step" id="wz4">
+      <div class="wz-success-icon">✓</div>
+      <div class="wizard-eyebrow">All set!</div>
+      <div class="wizard-title">VinylScrobbler is ready</div>
+      <div class="wizard-desc" id="wz4Desc">
+        Put a record on and VinylScrobbler will start identifying and scrobbling tracks automatically.
+      </div>
+      <div class="wz-progress">
+        <div class="wz-dot done"></div>
+        <div class="wz-dot done"></div>
+        <div class="wz-dot done"></div>
+        <div class="wz-dot done"></div>
+      </div>
+      <button class="wz-btn wz-btn-primary" onclick="closeWizard()">Open dashboard →</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="settings-overlay" id="settingsOverlay" onclick="closeSettings()"></div>
+<div class="settings-panel" id="settingsPanel">
+  <div class="settings-header">
+    <h2>⚙ Settings</h2>
+    <button class="btn-close" onclick="closeSettings()">✕</button>
+  </div>
+  <div class="settings-body">
+
+    <div class="settings-section">
+      <div class="settings-section-label">Last.fm Connection</div>
+      <div class="settings-status">
+        <div class="settings-status-dot" id="lfmStatusDot"></div>
+        <span id="lfmStatusText">Checking…</span>
+      </div>
+      <div class="field">
+        <label>API Key</label>
+        <input type="text" id="sCfgApiKey" placeholder="abcdef1234…" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>API Secret</label>
+        <input type="password" id="sCfgApiSecret" placeholder="Leave blank to keep current" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="sCfgUsername" placeholder="your_lastfm_username" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>New Password</label>
+        <input type="password" id="sCfgPassword" placeholder="Leave blank to keep current" autocomplete="new-password">
+        <div class="field-hint">Only fill this in if you want to change your password.</div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-label">Audio</div>
+      <div class="field">
+        <label>Input Device</label>
+        <select id="sCfgDevice"><option value="">Loading…</option></select>
+      </div>
+      <div class="field">
+        <label>Volume Threshold (RMS)</label>
+        <input type="number" id="sCfgVol" step="0.001" min="0.001" max="1" placeholder="0.01">
+        <div class="field-hint">Minimum signal level to count as audio. Raise if getting false triggers.</div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-label">Detection Tuning</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Retry Delay (s)</label>
+          <input type="number" id="sCfgRetry" min="5" max="120" placeholder="15">
+        </div>
+        <div class="field">
+          <label>Silence Timeout (s)</label>
+          <input type="number" id="sCfgSilence" min="10" max="300" placeholder="30">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Chunk Length (s)</label>
+          <input type="number" id="sCfgChunk" min="5" max="30" placeholder="10">
+        </div>
+        <div class="field">
+          <label>Sample Rate</label>
+          <input type="number" id="sCfgSampleRate" min="8000" max="96000" placeholder="44100">
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-label">Danger Zone</div>
+      <button class="wz-btn wz-btn-ghost" style="width:100%;font-size:11px" onclick="clearAllHistory()">
+        Clear all play history
+      </button>
+      <div class="field-hint" style="margin-top:8px;text-align:center">This cannot be undone.</div>
+    </div>
+
+  </div>
+  <div class="settings-footer">
+    <button class="btn-save" id="btnSave" onclick="saveSettings()">Save changes</button>
+  </div>
+</div>
+
 <div id="nowHero">
+  <div class="config-warning" id="configWarning">
+    ⚠ Last.fm is not configured or credentials are invalid.
+    <a onclick="openSettings()">Open settings →</a>
+  </div>
+
   <div class="hero-bar">
     <a class="logo" href="/">
       <div class="logo-vinyl" id="logoVinyl"></div>
@@ -477,6 +693,7 @@ main {
       <div class="hero-dot" id="heroDot"></div>
       <span class="hero-nowtext" id="heroNowText">Idle</span>
     </div>
+    <button class="btn-settings" title="Settings" onclick="openSettings()">⚙</button>
     <label class="det-toggle active" id="detToggle">
       <span id="detLabel">Recording</span>
       <div class="switch">
@@ -500,7 +717,6 @@ main {
 </div>
 
 <main>
-
   <div class="period-bar" id="periodBar">
     <button class="period-btn" data-period="today">Today</button>
     <button class="period-btn active" data-period="week">This week</button>
@@ -510,68 +726,40 @@ main {
   </div>
 
   <div class="summary-grid">
-    <div class="stat-card">
-      <div class="stat-label">Playcount</div>
-      <div class="stat-value" id="sPlays">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Listening time</div>
-      <div class="stat-value" id="sTime">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Artists</div>
-      <div class="stat-value" id="sArtists">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Albums</div>
-      <div class="stat-value" id="sAlbums">—</div>
-    </div>
+    <div class="stat-card"><div class="stat-label">Playcount</div><div class="stat-value" id="sPlays">—</div></div>
+    <div class="stat-card"><div class="stat-label">Listening time</div><div class="stat-value" id="sTime">—</div></div>
+    <div class="stat-card"><div class="stat-label">Artists</div><div class="stat-value" id="sArtists">—</div></div>
+    <div class="stat-card"><div class="stat-label">Albums</div><div class="stat-value" id="sAlbums">—</div></div>
   </div>
 
   <div class="grid-3">
-    <div class="card">
-      <div class="card-head"><h2>Top Artists</h2></div>
-      <div id="artistList"><div class="empty">Loading…</div></div>
-    </div>
-    <div class="card">
-      <div class="card-head"><h2>Top Tracks</h2></div>
-      <div id="trackList"><div class="empty">Loading…</div></div>
-    </div>
-    <div class="card">
-      <div class="card-head"><h2>Top Albums</h2></div>
-      <div id="albumList"><div class="empty">Loading…</div></div>
-    </div>
+    <div class="card"><div class="card-head"><h2>Top Artists</h2></div><div id="artistList"><div class="empty">Loading…</div></div></div>
+    <div class="card"><div class="card-head"><h2>Top Tracks</h2></div><div id="trackList"><div class="empty">Loading…</div></div></div>
+    <div class="card"><div class="card-head"><h2>Top Albums</h2></div><div id="albumList"><div class="empty">Loading…</div></div></div>
   </div>
 
   <div class="grid-2">
-    <div class="card">
-      <div class="card-head"><h2>Genres</h2></div>
-      <div id="genreList"><div class="empty">Loading…</div></div>
-    </div>
-    <div class="card" style="align-self:start">
-      <div class="card-head"><h2>Highlights</h2></div>
-      <div id="quickStats"><div class="empty">Loading…</div></div>
-    </div>
+    <div class="card"><div class="card-head"><h2>Genres</h2></div><div id="genreList"><div class="empty">Loading…</div></div></div>
+    <div class="card" style="align-self:start"><div class="card-head"><h2>Highlights</h2></div><div id="quickStats"><div class="empty">Loading…</div></div></div>
   </div>
 
   <div class="history-section">
     <div class="history-head"><h2>Recent plays</h2></div>
-    <div class="history-card">
-      <div id="historyBody"><div class="empty">Loading…</div></div>
-    </div>
-    <div class="load-more-wrap">
-      <button class="btn-ghost" id="loadMoreBtn" style="display:none">Load more</button>
-    </div>
+    <div class="history-card"><div id="historyBody"><div class="empty">Loading…</div></div></div>
+    <div class="load-more-wrap"><button class="btn-ghost" id="loadMoreBtn" style="display:none">Load more</button></div>
   </div>
-
 </main>
+
+<div class="toast-container" id="toastContainer"></div>
 
 <script>
 const API = window.location.origin;
 let currentPeriod = "week";
-let historyPage = 1;
-let historyTotal = 0;
+let historyPage   = 1;
+let historyTotal  = 0;
 const HISTORY_LIMIT = 50;
+
+let wz = { apiKey:"", apiSecret:"", username:"", passwordHash:"", deviceIndex:null };
 
 function fmtTimeShort(s) {
   if (!s) return "0m";
@@ -580,52 +768,252 @@ function fmtTimeShort(s) {
   if (h > 0) return `${h}h ${m}m`;
   return `${m}m`;
 }
-
 function timeAgo(ts) {
   const diff = Date.now()/1000 - ts;
   if (diff < 60)    return "just now";
   if (diff < 3600)  return `${Math.floor(diff/60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
-  return new Date(ts*1000).toLocaleDateString("es", {day:"numeric",month:"short"});
+  return new Date(ts*1000).toLocaleDateString("en", {day:"numeric",month:"short"});
+}
+function esc(s) { if (!s) return ""; return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function art(url, cls) { return url ? `<img src="${esc(url)}" class="${cls}" onerror="this.src='';this.style.background='var(--surface3)'">` : `<div class="${cls}"></div>`; }
+
+function toast(msg, type="") {
+  const el = document.createElement("div");
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.getElementById("toastContainer").appendChild(el);
+  setTimeout(() => {
+    el.style.animation = "toastOut .25s ease forwards";
+    setTimeout(() => el.remove(), 260);
+  }, 3200);
 }
 
-function esc(s) {
-  if (!s) return "";
-  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+function wzGo(step) {
+  document.querySelectorAll(".wizard-step").forEach((el,i) => el.classList.toggle("active", i === step));
+  if (step === 3) loadDevicesIntoSelect("wz3Device", null);
 }
 
-function art(url, cls) {
-  return url
-    ? `<img src="${esc(url)}" class="${cls}" onerror="this.src='';this.style.background='var(--surface3)'">`
-    : `<div class="${cls}"></div>`;
+async function wzStep1() {
+  const key = document.getElementById("wz1Key").value.trim();
+  const sec = document.getElementById("wz1Secret").value.trim();
+  const err = document.getElementById("wz1Error");
+  if (!key || !sec) { err.textContent="Both API Key and Secret are required."; err.classList.add("show"); return; }
+  err.classList.remove("show");
+  wz.apiKey = key; wz.apiSecret = sec;
+  wzGo(2);
 }
 
-// ── Now Playing ────────────────────────────────────────────────────────────────
+async function wzStep2() {
+  const user = document.getElementById("wz2User").value.trim();
+  const pass = document.getElementById("wz2Pass").value;
+  const err  = document.getElementById("wz2Error");
+  const btn  = document.getElementById("wz2Btn");
+  if (!user || !pass) { err.textContent="Username and password are required."; err.classList.add("show"); return; }
+  err.classList.remove("show");
+  btn.disabled = true; btn.textContent = "Verifying…";
+  try {
+    const res = await fetch(`${API}/api/lastfm/test`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ api_key:wz.apiKey, api_secret:wz.apiSecret, username:user, password:pass })
+    });
+    const d = await res.json();
+    if (d.ok) {
+      wz.username = d.username;
+      wz.passwordHash = d.password_hash;
+      wzGo(3);
+    } else {
+      err.textContent = d.error || "Verification failed. Check your credentials.";
+      err.classList.add("show");
+    }
+  } catch(e) {
+    err.textContent = "Network error. Is the server running?";
+    err.classList.add("show");
+  }
+  btn.disabled = false; btn.textContent = "Verify & continue →";
+}
+
+async function wzStep3() {
+  const sel = document.getElementById("wz3Device");
+  const err = document.getElementById("wz3Error");
+  const btn = document.getElementById("wz3Btn");
+  if (!sel.value && sel.value !== "0") { err.textContent="Please select an audio device."; err.classList.add("show"); return; }
+  err.classList.remove("show");
+  btn.disabled = true; btn.textContent = "Saving…";
+  try {
+    const payload = {
+      LASTFM_API_KEY:     wz.apiKey,
+      LASTFM_API_SECRET:  wz.apiSecret,
+      LASTFM_USERNAME:    wz.username,
+      LASTFM_PASSWORD_HASH: wz.passwordHash,
+      AUDIO_DEVICE_INDEX: parseInt(sel.value),
+    };
+    const res = await fetch(`${API}/api/config`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    const d = await res.json();
+    if (d.ok) {
+      document.getElementById("wz4Desc").textContent =
+        `Scrobbling to @${wz.username}. Put a record on — VinylScrobbler will do the rest.`;
+      wzGo(4);
+    } else {
+      err.textContent = d.error || "Failed to save config.";
+      err.classList.add("show");
+    }
+  } catch(e) {
+    err.textContent = "Network error saving config.";
+    err.classList.add("show");
+  }
+  btn.disabled = false; btn.textContent = "Finish setup →";
+}
+
+function closeWizard() {
+  document.getElementById("wizardOverlay").classList.remove("open");
+  checkSetupStatus(false);   // refresh 
+  loadSummary(currentPeriod);
+  loadHistory(1);
+}
+
+function openSettings() {
+  document.getElementById("settingsOverlay").classList.add("open");
+  document.getElementById("settingsPanel").classList.add("open");
+  populateSettings();
+}
+function closeSettings() {
+  document.getElementById("settingsOverlay").classList.remove("open");
+  document.getElementById("settingsPanel").classList.remove("open");
+}
+
+async function populateSettings() {
+
+  try {
+    const s = await fetch(`${API}/api/setup/status`).then(r=>r.json());
+    const dot  = document.getElementById("lfmStatusDot");
+    const txt  = document.getElementById("lfmStatusText");
+    if (s.lastfm_ok) {
+      dot.className="settings-status-dot ok"; txt.textContent=`Connected as @${s.username}`;
+    } else if (s.configured) {
+      dot.className="settings-status-dot warn"; txt.textContent="Credentials may be incorrect";
+    } else {
+      dot.className="settings-status-dot"; txt.textContent="Not configured";
+    }
+  } catch {}
+
+  try {
+    const cfg = await fetch(`${API}/api/config`).then(r=>r.json());
+    document.getElementById("sCfgApiKey").value      = cfg.LASTFM_API_KEY || "";
+    document.getElementById("sCfgUsername").value    = cfg.LASTFM_USERNAME || "";
+    document.getElementById("sCfgVol").value         = cfg.VOLUME_THRESHOLD ?? 0.01;
+    document.getElementById("sCfgRetry").value       = cfg.RETRY_DELAY ?? 15;
+    document.getElementById("sCfgSilence").value     = cfg.SILENCE_TIMEOUT ?? 30;
+    document.getElementById("sCfgChunk").value       = cfg.CHUNK_SECONDS ?? 10;
+    document.getElementById("sCfgSampleRate").value  = cfg.SAMPLE_RATE ?? 44100;
+    await loadDevicesIntoSelect("sCfgDevice", cfg.AUDIO_DEVICE_INDEX);
+  } catch {}
+}
+
+async function loadDevicesIntoSelect(selectId, currentIndex) {
+  try {
+    const { devices } = await fetch(`${API}/api/devices`).then(r=>r.json());
+    const sel = document.getElementById(selectId);
+    sel.innerHTML = devices.length
+      ? devices.map(d => `<option value="${d.index}" ${d.index == currentIndex ? "selected":""}>${d.name} (${d.channels}ch)</option>`).join("")
+      : `<option value="">No input devices found</option>`;
+  } catch {
+    document.getElementById(selectId).innerHTML = `<option value="">Failed to load devices</option>`;
+  }
+}
+
+async function saveSettings() {
+  const btn = document.getElementById("btnSave");
+  btn.disabled = true; btn.textContent = "Saving…";
+
+  const payload = {};
+
+  const apiKey     = document.getElementById("sCfgApiKey").value.trim();
+  const apiSecret  = document.getElementById("sCfgApiSecret").value.trim();
+  const username   = document.getElementById("sCfgUsername").value.trim();
+  const password   = document.getElementById("sCfgPassword").value;
+  const deviceSel  = document.getElementById("sCfgDevice");
+
+  if (apiKey && !apiKey.startsWith("••••"))    payload.LASTFM_API_KEY    = apiKey;
+  if (apiSecret && !apiSecret.startsWith("••••")) payload.LASTFM_API_SECRET = apiSecret;
+  if (username)  payload.LASTFM_USERNAME    = username;
+  if (password)  payload.LASTFM_PASSWORD    = password;   // server will hash
+  if (deviceSel.value !== "") payload.AUDIO_DEVICE_INDEX = parseInt(deviceSel.value);
+
+  payload.VOLUME_THRESHOLD  = parseFloat(document.getElementById("sCfgVol").value)       || 0.01;
+  payload.RETRY_DELAY       = parseInt(document.getElementById("sCfgRetry").value)        || 15;
+  payload.SILENCE_TIMEOUT   = parseInt(document.getElementById("sCfgSilence").value)      || 30;
+  payload.CHUNK_SECONDS     = parseInt(document.getElementById("sCfgChunk").value)        || 10;
+  payload.SAMPLE_RATE       = parseInt(document.getElementById("sCfgSampleRate").value)   || 44100;
+
+  try {
+    const res = await fetch(`${API}/api/config`, {
+      method: "POST", headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    const d = await res.json();
+    if (d.ok) {
+      toast("Settings saved", "success");
+      closeSettings();
+      checkSetupStatus(false);
+    } else {
+      toast(d.error || "Failed to save", "error");
+    }
+  } catch(e) {
+    toast("Network error", "error");
+  }
+  btn.disabled = false; btn.textContent = "Save changes";
+}
+
+async function clearAllHistory() {
+  if (!confirm("Delete all play history? This cannot be undone.")) return;
+  try {
+    const res = await fetch(`${API}/api/history`, { method:"DELETE" });
+    const d = await res.json();
+    toast(`Cleared ${d.deleted} entries`, "success");
+    loadHistory(1);
+    loadSummary(currentPeriod);
+  } catch { toast("Failed to clear history", "error"); }
+}
+
+async function checkSetupStatus(showWizardIfNeeded=true) {
+  try {
+    const s = await fetch(`${API}/api/setup/status`).then(r=>r.json());
+    const warn = document.getElementById("configWarning");
+    if (s.setup_required || !s.lastfm_ok) {
+      if (showWizardIfNeeded && s.setup_required) {
+        document.getElementById("wizardOverlay").classList.add("open");
+      } else {
+        warn.classList.add("show");
+      }
+    } else {
+      warn.classList.remove("show");
+    }
+  } catch {}
+}
+
 function setNowPlaying(track) {
   const dot      = document.getElementById("heroDot");
   const nowTxt   = document.getElementById("heroNowText");
   const expanded = document.getElementById("heroExpanded");
   const vinyl    = document.getElementById("logoVinyl");
-
   if (track) {
-    dot.classList.add("live");
-    nowTxt.classList.add("live");
+    dot.classList.add("live"); nowTxt.classList.add("live");
     nowTxt.textContent = `${track.artist} — ${track.title}`;
     vinyl.classList.add("spinning");
-
     document.getElementById("heroTitle").textContent      = track.title  || "—";
     document.getElementById("heroArtistName").textContent = track.artist || "—";
     document.getElementById("heroAlbum").textContent      = track.album  || "";
-
     const coverUrl = track.cover || "";
     document.getElementById("heroArt").src = coverUrl;
     document.getElementById("heroCoverBg").style.backgroundImage = coverUrl ? `url('${coverUrl}')` : "none";
     expanded.classList.add("open");
   } else {
-    dot.classList.remove("live");
-    nowTxt.classList.remove("live");
-    nowTxt.textContent = "Idle";
-    vinyl.classList.remove("spinning");
+    dot.classList.remove("live"); nowTxt.classList.remove("live");
+    nowTxt.textContent = "Idle"; vinyl.classList.remove("spinning");
     expanded.classList.remove("open");
   }
 }
@@ -645,24 +1033,22 @@ fetch(`${API}/api/now`).then(r=>r.json()).then(d => {
 }).catch(()=>{});
 connectWS();
 
-// ── Renders ────────────────────────────────────────────────────────────────────
 function renderArtists(list) {
   if (!list.length) return `<div class="empty">No data</div>`;
   return list.map((a,i) => `
     <div class="rank-item">
       <span class="rank-num">${i+1}</span>
-      ${art(a.cover_url, "rank-cover circle")}
+      ${art(a.cover_url,"rank-cover circle")}
       <div class="rank-info"><div class="rank-name">${esc(a.artist)}</div></div>
       <span class="rank-plays">${a.plays}×</span>
     </div>`).join("");
 }
-
 function renderTracks(list) {
   if (!list.length) return `<div class="empty">No data</div>`;
   return list.map((t,i) => `
     <div class="rank-item">
       <span class="rank-num">${i+1}</span>
-      ${art(t.cover_url, "rank-cover")}
+      ${art(t.cover_url,"rank-cover")}
       <div class="rank-info">
         <div class="rank-name">${esc(t.title)}</div>
         <div class="rank-sub">${esc(t.artist)}</div>
@@ -670,13 +1056,12 @@ function renderTracks(list) {
       <span class="rank-plays">${t.plays}×</span>
     </div>`).join("");
 }
-
 function renderAlbums(list) {
   if (!list.length) return `<div class="empty">No data</div>`;
   return list.map((a,i) => `
     <div class="rank-item">
       <span class="rank-num">${i+1}</span>
-      ${art(a.cover_url, "rank-cover")}
+      ${art(a.cover_url,"rank-cover")}
       <div class="rank-info">
         <div class="rank-name">${esc(a.album)}</div>
         <div class="rank-sub">${esc(a.artist)}</div>
@@ -684,46 +1069,35 @@ function renderAlbums(list) {
       <span class="rank-plays">${a.plays}×</span>
     </div>`).join("");
 }
-
 function renderGenres(list) {
   if (!list.length) return `<div class="empty">No genre data</div>`;
   const max = list[0].plays;
   return `<div class="genre-list">${list.map(g => `
     <div>
-      <div class="genre-label">
-        <span>${esc(g.genre)}</span>
-        <span>${g.plays} plays</span>
-      </div>
-      <div class="genre-track">
-        <div class="genre-fill" data-w="${(g.plays/max*100).toFixed(1)}"></div>
-      </div>
+      <div class="genre-label"><span>${esc(g.genre)}</span><span>${g.plays} plays</span></div>
+      <div class="genre-track"><div class="genre-fill" data-w="${(g.plays/max*100).toFixed(1)}"></div></div>
     </div>`).join("")}</div>`;
 }
-
 function renderHighlights(data) {
   const topArtist = data.top_artists[0];
   const topTrack  = data.top_tracks[0];
-  const avgMap    = {today:1, week:7, month:30, year:365};
-  const avg       = avgMap[data.period]
-    ? (data.total_plays / avgMap[data.period]).toFixed(1)
-    : "—";
-  const rows = [
+  const avgMap    = {today:1,week:7,month:30,year:365};
+  const avg       = avgMap[data.period] ? (data.total_plays/avgMap[data.period]).toFixed(1) : "—";
+  return [
     ["Top artist",    topArtist ? topArtist.artist : "—"],
     ["Top track",     topTrack  ? topTrack.title   : "—"],
     ["Avg / day",     avg],
     ["Genres logged", data.genres.length || 0],
-  ];
-  return rows.map(([l,v]) => `
+  ].map(([l,v]) => `
     <div class="qs-item">
       <div class="qs-label">${l}</div>
       <div class="qs-val">${esc(String(v))}</div>
     </div>`).join("");
 }
-
 function renderHistoryRows(plays) {
   return plays.map(p => `
     <div class="h-row" data-id="${p.id}">
-      ${art(p.cover_url, "h-art")}
+      ${art(p.cover_url,"h-art")}
       <div class="h-info">
         <div class="h-title">${esc(p.title||"—")}</div>
         <div class="h-artist">${esc(p.artist||"—")}</div>
@@ -735,26 +1109,20 @@ function renderHistoryRows(plays) {
     </div>`).join("");
 }
 
-// ── Load data ──────────────────────────────────────────────────────────────────
 async function loadSummary(period) {
   try {
     const data = await fetch(`${API}/api/stats/summary?period=${period}`).then(r=>r.json());
-
-    document.getElementById("sPlays").textContent   = data.total_plays.toLocaleString("es");
+    document.getElementById("sPlays").textContent   = data.total_plays.toLocaleString();
     document.getElementById("sTime").textContent    = fmtTimeShort(data.total_seconds);
     document.getElementById("sArtists").textContent = data.top_artists.length === 10 ? "10+" : data.top_artists.length;
     document.getElementById("sAlbums").textContent  = data.top_albums.length  === 10 ? "10+" : data.top_albums.length;
-
     document.getElementById("artistList").innerHTML  = renderArtists(data.top_artists);
     document.getElementById("trackList").innerHTML   = renderTracks(data.top_tracks);
     document.getElementById("albumList").innerHTML   = renderAlbums(data.top_albums);
     document.getElementById("quickStats").innerHTML  = renderHighlights(data);
     document.getElementById("genreList").innerHTML   = renderGenres(data.genres);
-
     requestAnimationFrame(() => {
-      document.querySelectorAll(".genre-fill[data-w]").forEach(el => {
-        el.style.width = el.dataset.w + "%";
-      });
+      document.querySelectorAll(".genre-fill[data-w]").forEach(el => { el.style.width = el.dataset.w + "%"; });
     });
   } catch(e) { console.error("Summary error:", e); }
 }
@@ -771,43 +1139,37 @@ async function loadHistory(page=1, append=false) {
     } else {
       body.insertAdjacentHTML("beforeend", renderHistoryRows(data.plays));
     }
-    const btn = document.getElementById("loadMoreBtn");
-    btn.style.display = page * HISTORY_LIMIT < historyTotal ? "inline-block" : "none";
+    document.getElementById("loadMoreBtn").style.display = page * HISTORY_LIMIT < historyTotal ? "inline-block" : "none";
   } catch(e) { console.error("History error:", e); }
 }
 
-// ── Delete ─────────────────────────────────────────────────────────────────────
 async function deletePlay(id, btn) {
   btn.disabled = true;
   try {
-    const res = await fetch(`${API}/api/history/${id}`, { method: "DELETE" });
+    const res = await fetch(`${API}/api/history/${id}`, { method:"DELETE" });
     if (res.ok) {
       const row = document.querySelector(`.h-row[data-id="${id}"]`);
       if (row) {
-        row.style.transition = "opacity .18s, padding .25s, max-height .25s";
-        row.style.opacity = "0";
-        row.style.maxHeight = "0";
-        row.style.padding = "0";
-        row.style.overflow = "hidden";
-        setTimeout(() => row.remove(), 260);
+        row.style.transition="opacity .18s, padding .25s, max-height .25s";
+        row.style.opacity="0"; row.style.maxHeight="0"; row.style.padding="0"; row.style.overflow="hidden";
+        setTimeout(()=>row.remove(), 260);
       }
       historyTotal--;
     }
   } catch(e) { btn.disabled = false; }
 }
 
-// ── Detection toggle ───────────────────────────────────────────────────────────
 document.getElementById("detSwitch").addEventListener("change", async (e) => {
   const toggle = document.getElementById("detToggle");
   const label  = document.getElementById("detLabel");
   try {
-    const data = await fetch(`${API}/api/detection/toggle`, { method:"POST" }).then(r=>r.json());
-    const on   = data.enabled;
+    const data = await fetch(`${API}/api/detection/toggle`, {method:"POST"}).then(r=>r.json());
+    const on = data.enabled;
     e.target.checked = on;
     toggle.classList.toggle("active", on);
     label.textContent = on ? "Recording" : "Paused";
     if (!on) setNowPlaying(null);
-  } catch(err) { e.target.checked = !e.target.checked; }
+  } catch { e.target.checked = !e.target.checked; }
 });
 
 fetch(`${API}/api/detection`).then(r=>r.json()).then(d => {
@@ -817,7 +1179,6 @@ fetch(`${API}/api/detection`).then(r=>r.json()).then(d => {
   document.getElementById("detLabel").textContent = on ? "Recording" : "Paused";
 }).catch(()=>{});
 
-// ── Period tabs ────────────────────────────────────────────────────────────────
 document.getElementById("periodBar").addEventListener("click", e => {
   const btn = e.target.closest(".period-btn");
   if (!btn) return;
@@ -832,6 +1193,7 @@ document.getElementById("loadMoreBtn").addEventListener("click", () => {
   loadHistory(historyPage, true);
 });
 
+checkSetupStatus(true);
 loadSummary(currentPeriod);
 loadHistory(1);
 

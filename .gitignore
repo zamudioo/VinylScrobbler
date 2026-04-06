@@ -1,4 +1,7 @@
-/backend/__pycache__
-/backend/config.py
+
+/backend/__pycache__/
+/backend/config.json
 /backend/stats.db
 backend.sh
+/venv/
+/V2/

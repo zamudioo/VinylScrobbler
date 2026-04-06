@@ -149,7 +149,7 @@ systemctl --user restart VinylScrobbler
 
 There are three common ways to feed audio into VinylScrobbler:
 
-1. Direct USB output from the turntable (e.g. Audio-Technica AT-LP120XUSB).
+1. Direct USB output from the source (e.g. i use a Audio-Technica AT-LP120XUSB, so it has a native usb output).
 2. A splitter between the source and your amplifier, with one output going to a USB audio converter.
 3. A microphone positioned near the speakers — less precise, may trigger on ambient noise.
 

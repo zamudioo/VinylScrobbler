@@ -24,7 +24,6 @@ fi
 chmod +x "$BACKEND_SCRIPT"
 mkdir -p ~/logs "$SYSTEMD_USER_DIR"
 
-# ── systemd user service ───────────────────────────────────────────────────────
 cat > "$SYSTEMD_USER_DIR/VinylScrobbler.service" <<EOF
 [Unit]
 Description=VinylScrobbler
@@ -64,8 +63,7 @@ echo "  sudo loginctl enable-linger $USER_NAME"
 echo ""
 
 LOCAL_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
-PORT=$(grep 'STATS_PORT' "$BASE_DIR/backend/config.py" 2>/dev/null | awk -F= '{gsub(/ /,"",$2); print $2}')
-PORT=${PORT:-8000}
+PORT=$(python3 -c "import json; d=json.load(open('$BASE_DIR/backend/config.json')); print(d.get('STATS_PORT',8000))" 2>/dev/null || echo 8000)
 
 echo "Stats dashboard:"
 echo "  http://${LOCAL_IP}:${PORT}   (from any device on your network)"
