@@ -58,10 +58,14 @@ chmod +x setup.sh
 
 The script will:
 - Create a virtual environment and install dependencies
+- Generate backend/config.py and backend.sh
+When the setup is over, you just execute it with
+```bash
+./backend.sh
+```
+Then you enter the dashboard, where it will
 - Let you select the audio input device
 - Ask for your Last.fm credentials
-- Generate backend/config.py and backend.sh
-
 ### Autostart on boot
 
 ```bash
@@ -152,9 +156,3 @@ There are three common ways to feed audio into VinylScrobbler:
 1. Direct USB output from the source (e.g. i use a Audio-Technica AT-LP120XUSB, so it has a native usb output).
 2. A splitter between the source and your amplifier, with one output going to a USB audio converter.
 3. A microphone positioned near the speakers — less precise, may trigger on ambient noise.
-
----
-
-## Contributing
-
-Built as a personal side project. Issues and pull requests are welcome.
