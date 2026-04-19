@@ -17,7 +17,7 @@ Runs fully headless on a Raspberry Pi — no display, no graphical environment r
 ---
 
 ## Stats dashboard
-!(https://imgur.com/hBoUxfR)
+!(https://i.imgur.com/hBoUxfR.png)
 Open from any device connected to your network:
 
 ```
