@@ -17,11 +17,11 @@ Runs fully headless on a Raspberry Pi — no display, no graphical environment r
 ---
 
 ## Stats dashboard
-
+!(https://imgur.com/hBoUxfR)
 Open from any device connected to your network:
 
 ```
-http://<your-raspberry-ip>:8000
+http://<your-raspberry-ip>:8000 [Or the port that you designated in the setup]
 ```
 
 Includes:
