@@ -7,3 +7,4 @@ pylast
 python-multipart
 soundfile
 audioop-lts
+spotipy

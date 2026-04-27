@@ -1,4 +1,4 @@
-#ZamudioScrobbler/backend/stats_service.py
+# backend/stats_service.py
 import sqlite3
 import time
 import os
@@ -6,10 +6,12 @@ from logger import logger
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "stats.db")
 
+
 def get_conn():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 def init_db():
     conn = get_conn()
@@ -35,6 +37,7 @@ def init_db():
     conn.close()
     logger.info("Stats DB initialized")
 
+
 def record_play(track: dict):
     conn = get_conn()
     conn.execute(
@@ -55,8 +58,24 @@ def record_play(track: dict):
     conn.close()
     logger.info(f"Stats: play recorded — {track.get('artist')} – {track.get('title')}")
 
+
+def update_play(play_id: int, updates: dict) -> bool:
+    """Correct artist / title / album for an existing play. Returns True if updated."""
+    allowed = {"artist", "title", "album"}
+    fields = {k: v for k, v in updates.items() if k in allowed}
+    if not fields:
+        return False
+    set_clause = ", ".join(f"{k} = ?" for k in fields)
+    values = list(fields.values()) + [play_id]
+    conn = get_conn()
+    cur = conn.execute(f"UPDATE plays SET {set_clause} WHERE id = ?", values)
+    affected = cur.rowcount
+    conn.commit()
+    conn.close()
+    return affected > 0
+
+
 def delete_play(play_id: int) -> bool:
-    """Delete a single play entry. Returns True if a row was deleted."""
     conn = get_conn()
     cur = conn.execute("DELETE FROM plays WHERE id = ?", (play_id,))
     affected = cur.rowcount
@@ -64,14 +83,15 @@ def delete_play(play_id: int) -> bool:
     conn.close()
     return affected > 0
 
+
 def clear_history() -> int:
-    """Delete all play entries. Returns the number of rows deleted."""
     conn = get_conn()
     cur = conn.execute("DELETE FROM plays")
     count = cur.rowcount
     conn.commit()
     conn.close()
     return count
+
 
 def start_session() -> int:
     conn = get_conn()
@@ -80,6 +100,7 @@ def start_session() -> int:
     conn.commit()
     conn.close()
     return session_id
+
 
 def end_session(session_id: int):
     if session_id is None:
@@ -92,7 +113,8 @@ def end_session(session_id: int):
     conn.commit()
     conn.close()
 
-# ── Stats queries ─────────────────────────────────────────────────────────────
+
+# ── Period helper ─────────────────────────────────────────────────────────────
 
 def _period_cutoff(period: str) -> int:
     now = int(time.time())
@@ -106,8 +128,11 @@ def _period_cutoff(period: str) -> int:
         return now - 30 * 86400
     elif period == "year":
         return now - 365 * 86400
-    else:  # all
+    else:
         return 0
+
+
+# ── Summary ───────────────────────────────────────────────────────────────────
 
 def get_summary(period: str = "all") -> dict:
     cutoff = _period_cutoff(period)
@@ -177,14 +202,15 @@ def get_summary(period: str = "all") -> dict:
     conn.close()
 
     return {
-        "period":       period,
-        "total_plays":  total_plays,
+        "period":        period,
+        "total_plays":   total_plays,
         "total_seconds": total_seconds,
-        "top_artists":  [dict(r) for r in top_artists],
-        "top_albums":   [dict(r) for r in top_albums],
-        "top_tracks":   [dict(r) for r in top_tracks],
-        "genres":       [dict(r) for r in genres],
+        "top_artists":   [dict(r) for r in top_artists],
+        "top_albums":    [dict(r) for r in top_albums],
+        "top_tracks":    [dict(r) for r in top_tracks],
+        "genres":        [dict(r) for r in genres],
     }
+
 
 def get_history(page: int = 1, limit: int = 50) -> dict:
     offset = (page - 1) * limit
@@ -205,4 +231,64 @@ def get_history(page: int = 1, limit: int = 50) -> dict:
         "limit": limit,
         "total": total,
         "plays": [dict(r) for r in rows],
+    }
+
+
+def get_artist_detail(artist: str) -> dict:
+    """Return full stats for a specific artist."""
+    conn = get_conn()
+
+    total_plays = conn.execute(
+        "SELECT COUNT(*) as c FROM plays WHERE artist = ?", (artist,)
+    ).fetchone()["c"]
+
+    top_tracks = conn.execute(
+        """
+        SELECT title, album, COUNT(*) as plays, cover_url,
+               MIN(timestamp) as first_heard, MAX(timestamp) as last_heard
+        FROM plays
+        WHERE artist = ?
+        GROUP BY title
+        ORDER BY plays DESC
+        LIMIT 20
+        """,
+        (artist,),
+    ).fetchall()
+
+    albums = conn.execute(
+        """
+        SELECT album, COUNT(*) as plays, cover_url
+        FROM plays
+        WHERE artist = ? AND album IS NOT NULL
+        GROUP BY album
+        ORDER BY plays DESC
+        """,
+        (artist,),
+    ).fetchall()
+
+    # Last 50 plays for timeline
+    recent = conn.execute(
+        """
+        SELECT id, timestamp, title, album, cover_url
+        FROM plays
+        WHERE artist = ?
+        ORDER BY timestamp DESC
+        LIMIT 50
+        """,
+        (artist,),
+    ).fetchall()
+
+    cover = None
+    if top_tracks:
+        cover = top_tracks[0]["cover_url"]
+
+    conn.close()
+
+    return {
+        "artist":      artist,
+        "cover":       cover,
+        "total_plays": total_plays,
+        "top_tracks":  [dict(r) for r in top_tracks],
+        "albums":      [dict(r) for r in albums],
+        "recent":      [dict(r) for r in recent],
     }

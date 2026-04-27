@@ -5,3 +5,4 @@
 backend.sh
 /venv/
 /V2/
+/backend/.spotify_token_cache

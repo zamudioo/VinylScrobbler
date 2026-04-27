@@ -43,8 +43,8 @@ Filterable by: Today / Week / Month / Year / All time.
 - Raspberry Pi running Raspberry Pi OS (Bookworm recommended)
 - Python 3.11+
 - Audio source connected (turntable USB output, splitter + USB converter, or microphone)
-- Last.fm account with API key and secret — https://www.last.fm/api/
-
+- (OPCIONAL)Last.fm account with API key and secret — https://www.last.fm/api/ 
+- (OPCIONAL)Spotify account with API key and secret - https://developer.spotify.com/dashboard
 ### Installation
 
 ```bash
@@ -65,7 +65,7 @@ When the setup is over, you just execute it with
 ```
 Then you enter the dashboard, where it will
 - Let you select the audio input device
-- Ask for your Last.fm credentials
+- Ask for your Last.fm and Spotify credentials
 ### Autostart on boot
 
 ```bash

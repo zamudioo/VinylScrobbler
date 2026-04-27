@@ -41,33 +41,6 @@ echo "Dependencies installed."
 echo ""
 
 
-echo "Detecting audio input devices..."
-echo ""
-
-mapfile -t AUDIO_DEVICES < <(python3 - <<'PY'
-import sounddevice as sd
-for i, d in enumerate(sd.query_devices()):
-    if d["max_input_channels"] > 0:
-        print(f"{i}|{d['name']} ({d['max_input_channels']} ch)")
-PY
-)
-
-if [ ${#AUDIO_DEVICES[@]} -eq 0 ]; then
-  echo "WARNING: No audio input devices found."
-  echo "  You can set AUDIO_DEVICE_INDEX later via the web Settings panel."
-  AUDIO_DEVICE_INDEX="null"
-else
-  echo "Select the audio input device (the one connected to your turntable/mixer):"
-  select dev in "${AUDIO_DEVICES[@]}"; do
-    AUDIO_DEVICE_INDEX="${dev%%|*}"
-    echo "Selected: ${dev##*|}"
-    break
-  done
-fi
-
-echo ""
-
-
 read -p "Stats web port [enter for default(8000)]: " STATS_PORT
 STATS_PORT=${STATS_PORT:-8000}
 
@@ -75,34 +48,37 @@ echo ""
 
 
 if [ -f "$CONFIG_JSON" ]; then
-  echo "Updating existing config.json (preserving Last.fm credentials)..."
+  echo "Updating existing config.json (preserving credentials and device config)..."
   python3 - <<PY
-import json, os
+import json
 path = "$CONFIG_JSON"
 with open(path) as f:
     d = json.load(f)
-d["AUDIO_DEVICE_INDEX"] = $AUDIO_DEVICE_INDEX
 d["STATS_PORT"] = $STATS_PORT
 with open(path, "w") as f:
     json.dump(d, f, indent=2)
 print("  config.json updated.")
 PY
 else
-  echo "Creating config.json..."
+  echo "Creating config.json (device will be selected in the web wizard)..."
   python3 - <<PY
 import json
 d = {
-    "SAMPLE_RATE":        44100,
-    "CHUNK_SECONDS":      10,
-    "RETRY_DELAY":        15,
-    "SILENCE_TIMEOUT":    30,
-    "VOLUME_THRESHOLD":   0.01,
-    "AUDIO_DEVICE_INDEX": $AUDIO_DEVICE_INDEX,
-    "LASTFM_API_KEY":     "",
-    "LASTFM_API_SECRET":  "",
-    "LASTFM_USERNAME":    "",
+    "SAMPLE_RATE":          44100,
+    "CHUNK_SECONDS":        10,
+    "RETRY_DELAY":          15,
+    "SILENCE_TIMEOUT":      30,
+    "VOLUME_THRESHOLD":     0.01,
+    "AUDIO_DEVICE_INDEX":   None,
+    "LASTFM_API_KEY":       "",
+    "LASTFM_API_SECRET":    "",
+    "LASTFM_USERNAME":      "",
     "LASTFM_PASSWORD_HASH": "",
-    "STATS_PORT":         $STATS_PORT,
+    "SPOTIFY_CLIENT_ID":    "",
+    "SPOTIFY_CLIENT_SECRET": "",
+    "SPOTIFY_ENABLED":      True,
+    "SHAZAM_MIN_MATCHES":   1,
+    "STATS_PORT":           $STATS_PORT,
 }
 with open("$CONFIG_JSON", "w") as f:
     json.dump(d, f, indent=2)
@@ -110,13 +86,13 @@ print("  config.json created.")
 PY
 fi
 
-cat > "$BASE_DIR/backend.sh" <<EOF
+cat > "$BASE_DIR/backend.sh" <<BEOF
 #!/usr/bin/env bash
 cd "$BASE_DIR"
 source venv/bin/activate
 cd backend
 exec uvicorn main:app --host 0.0.0.0 --port $STATS_PORT
-EOF
+BEOF
 chmod +x "$BASE_DIR/backend.sh"
 
 echo ""

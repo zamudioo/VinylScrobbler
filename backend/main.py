@@ -7,17 +7,17 @@ import time
 
 import sounddevice as sd
 from fastapi import FastAPI, WebSocket
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from audio import record_chunk, has_audio
 from config import cfg
-from lastfm_service import scrobble, init_network, test_credentials
+from lastfm_service import scrobble, update_now_playing, init_network, test_credentials
 from logger import logger
 from state import state
 from stats_service import (
-    init_db, record_play, start_session, end_session,
-    get_summary, get_history, delete_play, clear_history,
+    init_db, record_play, update_play, start_session, end_session,
+    get_summary, get_history, get_artist_detail, delete_play, clear_history,
 )
 
 app = FastAPI(title="VinylScrobbler")
@@ -37,7 +37,6 @@ _SUFFIX_PARENS = re.compile(
     r"[^\)\]]*[\)\]]\s*$",
     re.IGNORECASE,
 )
-
 _SUFFIX_DASH = re.compile(
     r"\s*[\-–]\s*"
     r"(remaster(?:ed)?|live|version|edit|radio|acoustic|"
@@ -102,6 +101,19 @@ async def serve_stats_page():
     return FileResponse(path)
 
 
+@app.get("/sw.js")
+async def serve_sw():
+    """Serve service worker from root scope so it can intercept all requests."""
+    path = os.path.join(STATS_WEB_DIR, "sw.js")
+    return FileResponse(path, media_type="application/javascript")
+
+
+@app.get("/manifest.json")
+async def serve_manifest():
+    path = os.path.join(STATS_WEB_DIR, "manifest.json")
+    return FileResponse(path, media_type="application/json")
+
+
 @app.get("/api/now")
 async def now_playing():
     return {"status": state.status, "track": state.current_track}
@@ -133,10 +145,11 @@ async def toggle_detection():
 
 @app.get("/api/setup/status")
 async def setup_status():
-    """Used by the web UI to decide whether to show the setup wizard."""
     configured = cfg.is_configured()
     lastfm_ok  = False
-    if configured:
+    spotify_ok = False
+
+    if cfg.lastfm_configured():
         result = test_credentials(
             cfg.LASTFM_API_KEY,
             cfg.LASTFM_API_SECRET,
@@ -144,27 +157,34 @@ async def setup_status():
             cfg.LASTFM_PASSWORD_HASH,
         )
         lastfm_ok = result["ok"]
+
+    if cfg.spotify_configured():
+        from spotify_service import is_connected
+        spotify_ok = is_connected()
+
     return {
         "configured":     configured,
-        "lastfm_ok":      lastfm_ok,
         "setup_required": not configured,
+        "lastfm_configured": cfg.lastfm_configured(),
+        "lastfm_ok":      lastfm_ok,
+        "spotify_configured": cfg.spotify_configured(),
+        "spotify_ok":     spotify_ok,
         "audio_device":   cfg.AUDIO_DEVICE_INDEX,
-        "username":       cfg.LASTFM_USERNAME if configured else "",
+        "username":       cfg.LASTFM_USERNAME if cfg.lastfm_configured() else "",
     }
 
 
 @app.get("/api/config")
 async def get_config():
-    """Return current config with sensitive fields masked."""
     return cfg.to_public()
 
 
 @app.post("/api/config")
 async def update_config(data: dict):
-    """Save config updates. Accepts LASTFM_PASSWORD (plaintext) → auto-hashed."""
     try:
         cfg.save(data)
-        init_network()          # re-connect Last.fm with new creds
+        if cfg.lastfm_configured():
+            init_network()
         return {"ok": True}
     except Exception as e:
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
@@ -172,7 +192,6 @@ async def update_config(data: dict):
 
 @app.get("/api/devices")
 async def list_audio_devices():
-    """List available audio input devices."""
     devices = []
     for i, d in enumerate(sd.query_devices()):
         if d["max_input_channels"] > 0:
@@ -187,10 +206,6 @@ async def list_audio_devices():
 
 @app.post("/api/lastfm/test")
 async def test_lastfm(data: dict):
-    """Validate Last.fm credentials before saving.
-    Accepts {api_key, api_secret, username, password}.
-    Returns {ok, error?, username?, password_hash?}.
-    """
     api_key    = (data.get("api_key")    or "").strip()
     api_secret = (data.get("api_secret") or "").strip()
     username   = (data.get("username")   or "").strip()
@@ -212,20 +227,67 @@ async def test_lastfm(data: dict):
     return result
 
 
-# stats
-@app.get("/api/stats/summary")
-async def stats_summary(period: str = "week"):
-    allowed = {"today", "week", "month", "year", "all"}
-    if period not in allowed:
-        return JSONResponse({"error": "invalid period"}, status_code=400)
-    return get_summary(period)
+# ── Spotify OAuth ─────────────────────────────────────────────────────────────
+
+@app.get("/api/spotify/status")
+async def spotify_status():
+    if not cfg.spotify_configured():
+        return {"client_configured": False, "connected": False, "username": None,
+                "redirect_uri": cfg.SPOTIFY_REDIRECT_URI}
+    from spotify_service import get_status
+    return get_status()
 
 
-@app.get("/api/stats/history")
-async def stats_history(page: int = 1, limit: int = 50):
-    if limit > 200:
-        limit = 200
-    return get_history(page, limit)
+@app.get("/api/spotify/auth-url")
+async def spotify_auth_url():
+    if not cfg.spotify_configured():
+        return JSONResponse({"ok": False, "error": "Spotify not configured"}, status_code=400)
+    from spotify_service import get_auth_url
+    url = get_auth_url()
+    return {"ok": True, "url": url}
+
+
+@app.get("/api/spotify/callback")
+async def spotify_callback(code: str = None, error: str = None):
+    """Spotify redirects here after user approves. Exchange code for tokens."""
+    if error or not code:
+        return RedirectResponse(url="/?spotify=error")
+    from spotify_service import handle_callback
+    ok = handle_callback(code)
+    if ok:
+        return RedirectResponse(url="/?spotify=connected")
+    return RedirectResponse(url="/?spotify=error")
+
+
+@app.post("/api/spotify/disconnect")
+async def spotify_disconnect():
+    from spotify_service import disconnect
+    disconnect()
+    return {"ok": True}
+
+
+@app.post("/api/spotify/like")
+async def spotify_like(data: dict):
+    """Manually like a track on Spotify."""
+    if not cfg.spotify_configured():
+        return JSONResponse({"ok": False, "error": "Spotify not configured"}, status_code=400)
+    from spotify_service import like_track, is_connected
+    if not is_connected():
+        return JSONResponse({"ok": False, "error": "Spotify not connected"}, status_code=401)
+    ok = like_track(data)
+    return {"ok": ok}
+
+
+# ── History / Track correction ────────────────────────────────────────────────
+
+@app.patch("/api/history/{play_id}")
+async def patch_play(play_id: int, data: dict):
+    """Correct artist / title / album for a play entry."""
+    ok = update_play(play_id, data)
+    if not ok:
+        return JSONResponse({"error": "not found or no valid fields"}, status_code=404)
+    logger.info(f"Play {play_id} corrected: {data}")
+    return {"updated": play_id}
 
 
 @app.delete("/api/history/{play_id}")
@@ -244,6 +306,30 @@ async def clear_all_history():
     return {"deleted": count}
 
 
+# ── Stats ─────────────────────────────────────────────────────────────────────
+
+@app.get("/api/stats/summary")
+async def stats_summary(period: str = "week"):
+    allowed = {"today", "week", "month", "year", "all"}
+    if period not in allowed:
+        return JSONResponse({"error": "invalid period"}, status_code=400)
+    return get_summary(period)
+
+
+@app.get("/api/stats/history")
+async def stats_history(page: int = 1, limit: int = 50):
+    if limit > 200:
+        limit = 200
+    return get_history(page, limit)
+
+
+@app.get("/api/stats/artist/{artist}")
+async def artist_detail(artist: str):
+    from urllib.parse import unquote
+    return get_artist_detail(unquote(artist))
+
+
+# ── Detection loop ────────────────────────────────────────────────────────────
 
 async def detection_loop():
     silence_start = None
@@ -274,8 +360,15 @@ async def detection_loop():
                     if state.current_session_id is None:
                         state.current_session_id = start_session()
 
+                    # Always record locally
                     record_play(track)
-                    scrobble(track)
+
+                    # Last.fm — only if configured
+                    if cfg.lastfm_configured():
+                        scrobble(track)
+                    else:
+                        logger.info("Last.fm not configured — scrobble skipped")
+
                 else:
                     logger.info(
                         f"Dedup: skipping re-detection of "
@@ -308,6 +401,15 @@ async def detection_loop():
 @app.on_event("startup")
 async def startup():
     init_db()
-    init_network()
+    if cfg.lastfm_configured():
+        init_network()
+    else:
+        logger.info("Last.fm not configured — scrobbling disabled (can be set up later)")
+    if cfg.spotify_configured():
+        from spotify_service import is_connected
+        if is_connected():
+            logger.info("Spotify connected")
+        else:
+            logger.info("Spotify credentials set but not yet authenticated")
     asyncio.create_task(detection_loop())
-    logger.info("VinylScrobbler backend started (headless mode)")
+    logger.info("VinylScrobbler backend started")

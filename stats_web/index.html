@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VinylScrobbler · Stats</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#080809">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VinylScrobbler">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -117,6 +123,23 @@ body::after {
   flex-shrink: 0; transition: all .18s;
 }
 .btn-settings:hover { border-color: var(--text3); color: var(--text); background: var(--surface3); }
+.btn-sp-like {
+  background: none; border: 1.5px solid var(--border2); color: var(--text3);
+  border-radius: 50px; padding: 5px 12px; font-size: 13px; cursor: pointer;
+  font-family: inherit; display: none; align-items: center; gap: 6px;
+  transition: border-color .15s, color .15s, background .15s;
+  white-space: nowrap;
+}
+.btn-sp-like:hover { border-color: #1DB954; color: #1DB954; }
+.btn-sp-like.liked { border-color: #1DB954; color: #1DB954; background: rgba(29,185,84,.1); }
+.btn-sp-like.visible { display: inline-flex; }
+.btn-sp-like-row {
+  background: none; border: none; color: var(--text3); cursor: pointer;
+  font-size: 16px; padding: 4px 5px; border-radius: 5px; line-height: 1;
+  transition: color .15s;
+}
+.btn-sp-like-row:hover { color: #1DB954; }
+.btn-sp-like-row.liked { color: #1DB954; }
 
 .det-toggle {
   display: flex; align-items: center; gap: 8px;
@@ -480,6 +503,66 @@ main { max-width: 1160px; margin: 0 auto; padding: 36px 24px 100px; position: re
 }
 .config-warning.show { display: flex; }
 .config-warning a { color: inherit; font-weight: 700; cursor: pointer; text-decoration: underline; }
+
+/* ═══════════════════════════════════════════════════ ARTIST MODAL */
+.artist-modal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,.75); backdrop-filter: blur(8px);
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.artist-modal-overlay.open { opacity: 1; pointer-events: all; }
+.artist-modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--r-lg); width: 100%; max-width: 620px;
+  max-height: 88vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(0,0,0,.6);
+}
+.artist-modal-header {
+  display: flex; align-items: center; gap: 18px; padding: 24px 24px 20px;
+  border-bottom: 1px solid var(--border); position: sticky; top: 0;
+  background: var(--surface); z-index: 2;
+}
+.artist-modal-cover { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; background: var(--surface3); flex-shrink: 0; }
+.artist-modal-cover-ph { width: 64px; height: 64px; border-radius: 8px; background: var(--surface3); display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+.artist-modal-name { font-size: 22px; font-weight: 700; }
+.artist-modal-plays { font-size: 13px; color: var(--text2); margin-top: 2px; }
+.artist-modal-close { margin-left: auto; background: none; border: none; color: var(--text2); font-size: 20px; cursor: pointer; padding: 4px 8px; line-height: 1; border-radius: 6px; }
+.artist-modal-close:hover { background: var(--surface2); color: var(--text); }
+.artist-modal-body { padding: 20px 24px 24px; }
+.artist-modal-section { margin-bottom: 22px; }
+.artist-modal-section h4 { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; }
+.artist-track-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.artist-track-row:last-child { border-bottom: none; }
+.artist-track-title { font-size: 13px; font-weight: 600; flex: 1; }
+.artist-track-album { font-size: 11px; color: var(--text3); }
+.artist-track-plays { font-size: 12px; color: var(--accent); font-weight: 700; white-space: nowrap; }
+.artist-album-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; margin: 0 8px 8px 0; font-size: 12px; }
+.artist-album-chip-plays { color: var(--accent); font-weight: 700; margin-left: 4px; }
+
+/* ═══════════════════════════════════════════════════ EDIT TRACK */
+.edit-track-row { background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 14px 16px; margin: 6px 0; display: none; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+.edit-track-row.open { display: flex; }
+.edit-track-row .field { flex: 1; min-width: 120px; }
+.edit-track-row .field label { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--text3); display: block; margin-bottom: 5px; }
+.edit-track-row .field input { background: var(--surface); border: 1px solid var(--border2); color: var(--text); border-radius: 7px; padding: 7px 10px; font-size: 13px; width: 100%; font-family: inherit; }
+.edit-track-row .field input:focus { outline: none; border-color: var(--accent); }
+.edit-track-actions { display: flex; gap: 8px; }
+.btn-edit-save { background: var(--accent); color: #fff; border: none; border-radius: 7px; padding: 8px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.btn-edit-cancel { background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); border-radius: 7px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-edit-icon { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; padding: 4px 6px; border-radius: 5px; line-height: 1; }
+.btn-edit-icon:hover { color: var(--text2); background: var(--surface3); }
+
+/* ═══════════════════════════════════════════════════ SPOTIFY WIZARD */
+.spotify-connect-area { background: var(--surface2); border: 1px solid var(--border2); border-radius: 12px; padding: 18px 20px; margin: 18px 0; text-align: center; }
+.spotify-connect-area .sp-logo { font-size: 28px; margin-bottom: 8px; }
+.spotify-connect-area .sp-status { font-size: 13px; color: var(--text2); margin-bottom: 12px; }
+.spotify-connect-area .sp-status.ok { color: var(--green); }
+.btn-spotify { background: #1DB954; color: #000; border: none; border-radius: 50px; padding: 10px 22px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; }
+.btn-spotify:hover { background: #1ed760; }
+.wz-skip { display: block; margin-top: 14px; background: none; border: none; color: var(--text3); font-size: 12px; cursor: pointer; font-family: inherit; text-decoration: underline; }
+.wz-skip:hover { color: var(--text2); }
+.wz-info-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin: 14px 0; font-size: 12px; color: var(--text2); line-height: 1.6; }
+.wz-info-box strong { color: var(--text); }
 </style>
 </head>
 <body>
@@ -492,13 +575,16 @@ main { max-width: 1160px; margin: 0 auto; padding: 36px 24px 100px; position: re
       <div class="wizard-eyebrow">Welcome</div>
       <div class="wizard-title">Let's set up VinylScrobbler</div>
       <div class="wizard-desc">
-        VinylScrobbler listens to your turntable, identifies songs with Shazam,
-        and scrobbles them to Last.fm — automatically.<br><br>
-        You'll need a <strong>Last.fm API account</strong> (free) and your
-        <strong>audio input device</strong> ready. Takes about 2 minutes.
+        VinylScrobbler escucha tu tornamesa, identifica canciones con Shazam
+        y las guarda en tu historial local.<br><br>
+        <strong>Servicios opcionales:</strong> puedes vincular <strong>Last.fm</strong>
+        para scrobbling y <strong>Spotify</strong> para agregar canciones a tus Liked Songs.
+        Puedes saltar estos pasos y configurarlos después.<br><br>
+        Lo único <strong>requerido</strong> es seleccionar tu dispositivo de audio.
       </div>
       <div class="wz-progress">
         <div class="wz-dot active"></div>
+        <div class="wz-dot"></div>
         <div class="wz-dot"></div>
         <div class="wz-dot"></div>
         <div class="wz-dot"></div>
@@ -507,18 +593,21 @@ main { max-width: 1160px; margin: 0 auto; padding: 36px 24px 100px; position: re
     </div>
 
     <div class="wizard-step" id="wz1">
-      <div class="wizard-eyebrow">Step 1 of 3</div>
+      <div class="wizard-eyebrow">Paso 1 de 4 — Opcional</div>
       <div class="wizard-title">Last.fm API Keys</div>
-      <div class="wizard-desc">Create a free API application on Last.fm to get your keys.</div>
+      <div class="wizard-desc">Conecta Last.fm para scrobblear tus canciones automáticamente.</div>
+      <div class="wz-info-box">
+        <strong>¿Sin Last.fm?</strong> No pasa nada — las canciones igual se guardan en la base de datos local y puedes ver todo en el dashboard. Puedes vincularlo después desde Settings.
+      </div>
       <div class="wz-progress">
         <div class="wz-dot done"></div>
         <div class="wz-dot active"></div>
         <div class="wz-dot"></div>
         <div class="wz-dot"></div>
+        <div class="wz-dot"></div>
       </div>
       <div class="field-hint" style="margin-bottom:18px">
         Don't have API keys yet? <a href="https://www.last.fm/api/account/create" target="_blank">Create a Last.fm API account →</a>
-        (Application name can be anything, e.g. "VinylScrobbler")
       </div>
       <div class="wz-error" id="wz1Error"></div>
       <div class="field">
@@ -531,16 +620,18 @@ main { max-width: 1160px; margin: 0 auto; padding: 36px 24px 100px; position: re
       </div>
       <button class="wz-btn wz-btn-primary" id="wz1Btn" onclick="wzStep1()">Continue →</button>
       <button class="wz-btn wz-btn-ghost" onclick="wzGo(0)">← Back</button>
+      <button class="wz-skip" onclick="wzSkipLastfm()">Saltar Last.fm — solo guardar localmente →</button>
     </div>
 
     <div class="wizard-step" id="wz2">
-      <div class="wizard-eyebrow">Step 2 of 3</div>
-      <div class="wizard-title">Your Last.fm Account</div>
-      <div class="wizard-desc">Enter the credentials for the account that will receive your scrobbles.</div>
+      <div class="wizard-eyebrow">Paso 2 de 4 — Opcional</div>
+      <div class="wizard-title">Tu cuenta de Last.fm</div>
+      <div class="wizard-desc">Ingresa las credenciales de la cuenta que recibirá tus scrobbles.</div>
       <div class="wz-progress">
         <div class="wz-dot done"></div>
         <div class="wz-dot done"></div>
         <div class="wz-dot active"></div>
+        <div class="wz-dot"></div>
         <div class="wz-dot"></div>
       </div>
       <div class="wz-error" id="wz2Error"></div>
@@ -551,38 +642,80 @@ main { max-width: 1160px; margin: 0 auto; padding: 36px 24px 100px; position: re
       <div class="field">
         <label>Password</label>
         <input type="password" id="wz2Pass" placeholder="••••••••" autocomplete="current-password">
-        <div class="field-hint">Your password is hashed locally (MD5) before being sent. It is never stored in plaintext.</div>
+        <div class="field-hint">Tu contraseña se hashea localmente (MD5) antes de enviarse. Nunca se guarda en texto plano.</div>
       </div>
       <button class="wz-btn wz-btn-primary" id="wz2Btn" onclick="wzStep2()">Verify & continue →</button>
       <button class="wz-btn wz-btn-ghost" onclick="wzGo(1)">← Back</button>
+      <button class="wz-skip" onclick="wzSkipLastfm()">Saltar Last.fm →</button>
     </div>
+
+    <!-- PASO 3: SPOTIFY (nuevo) -->
     <div class="wizard-step" id="wz3">
-      <div class="wizard-eyebrow">Step 3 of 3</div>
-      <div class="wizard-title">Audio Input</div>
-      <div class="wizard-desc">Select the audio device connected to your turntable or mixer.</div>
+      <div class="wizard-eyebrow">Paso 3 de 4 — Opcional</div>
+      <div class="wizard-title">Spotify</div>
+      <div class="wizard-desc">Conecta Spotify para agregar canciones detectadas a tus Liked Songs automáticamente.</div>
+      <div class="wz-info-box">
+        Necesitas crear una app en <a href="https://developer.spotify.com/dashboard" target="_blank">Spotify Developer Dashboard</a>
+        y agregar este Redirect URI exacto:<br>
+        <code id="wz3RedirectUri" style="display:block;margin-top:8px;padding:6px 10px;background:var(--surface);border-radius:6px;font-family:monospace;font-size:11px;word-break:break-all;color:var(--accent)">http://127.0.0.1:8000/api/spotify/callback</code>
+      </div>
       <div class="wz-progress">
         <div class="wz-dot done"></div>
         <div class="wz-dot done"></div>
         <div class="wz-dot done"></div>
         <div class="wz-dot active"></div>
+        <div class="wz-dot"></div>
       </div>
       <div class="wz-error" id="wz3Error"></div>
       <div class="field">
-        <label>Audio Input Device</label>
-        <select id="wz3Device"><option value="">Loading devices…</option></select>
+        <label>Client ID</label>
+        <input type="text" id="wz3SpClientId" placeholder="tu client ID de Spotify" autocomplete="off">
       </div>
-      <button class="wz-btn wz-btn-primary" id="wz3Btn" onclick="wzStep3()">Finish setup →</button>
+      <div class="field">
+        <label>Client Secret</label>
+        <input type="password" id="wz3SpClientSecret" placeholder="••••••••••••••••" autocomplete="off">
+      </div>
+      <div class="spotify-connect-area" id="wz3ConnectArea" style="display:none">
+        <div class="sp-logo">🎧</div>
+        <div class="sp-status" id="wz3SpStatus">Guarda las credenciales primero</div>
+        <button class="btn-spotify" id="wz3SpBtn" onclick="wzConnectSpotify()">
+          ♫ Connect Spotify
+        </button>
+      </div>
+      <button class="wz-btn wz-btn-primary" id="wz3Btn" onclick="wzStep3Spotify()">Guardar y conectar →</button>
       <button class="wz-btn wz-btn-ghost" onclick="wzGo(2)">← Back</button>
+      <button class="wz-skip" onclick="wzGo(4)">Saltar Spotify →</button>
     </div>
 
     <div class="wizard-step" id="wz4">
+      <div class="wizard-eyebrow">Paso 4 de 4 — Requerido</div>
+      <div class="wizard-title">Audio Input</div>
+      <div class="wizard-desc">Selecciona el dispositivo de audio conectado a tu tornamesa o mixer.</div>
+      <div class="wz-progress">
+        <div class="wz-dot done"></div>
+        <div class="wz-dot done"></div>
+        <div class="wz-dot done"></div>
+        <div class="wz-dot done"></div>
+        <div class="wz-dot active"></div>
+      </div>
+      <div class="wz-error" id="wz4Error"></div>
+      <div class="field">
+        <label>Audio Input Device</label>
+        <select id="wz4Device"><option value="">Loading devices…</option></select>
+      </div>
+      <button class="wz-btn wz-btn-primary" id="wz4Btn" onclick="wzStep4()">Finish setup →</button>
+      <button class="wz-btn wz-btn-ghost" onclick="wzGo(3)">← Back</button>
+    </div>
+
+    <div class="wizard-step" id="wz5">
       <div class="wz-success-icon">✓</div>
       <div class="wizard-eyebrow">All set!</div>
       <div class="wizard-title">VinylScrobbler is ready</div>
-      <div class="wizard-desc" id="wz4Desc">
-        Put a record on and VinylScrobbler will start identifying and scrobbling tracks automatically.
+      <div class="wizard-desc" id="wz5Desc">
+        Pon un disco y VinylScrobbler empieza a identificar canciones automáticamente.
       </div>
       <div class="wz-progress">
+        <div class="wz-dot done"></div>
         <div class="wz-dot done"></div>
         <div class="wz-dot done"></div>
         <div class="wz-dot done"></div>
@@ -641,6 +774,33 @@ main { max-width: 1160px; margin: 0 auto; padding: 36px 24px 100px; position: re
     </div>
 
     <div class="settings-section">
+      <div class="settings-section-label">Spotify</div>
+      <div class="settings-status">
+        <div class="settings-status-dot" id="spStatusDot"></div>
+        <span id="spStatusText">Checking…</span>
+      </div>
+      <div class="field">
+        <label>Client ID</label>
+        <input type="text" id="sCfgSpClientId" placeholder="Client ID de Spotify" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Client Secret</label>
+        <input type="password" id="sCfgSpClientSecret" placeholder="Dejar vacío para mantener" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Redirect URI</label>
+        <input type="text" id="sCfgSpRedirectUri" readonly style="opacity:.6;cursor:default">
+        <div class="field-hint">Copia este URI exacto en tu app de Spotify Developer Dashboard.</div>
+      </div>
+      <div id="sSpConnectWrap" style="display:none;margin-top:12px;text-align:center">
+        <button class="btn-spotify" onclick="settingsConnectSpotify()">♫ Conectar Spotify</button>
+      </div>
+      <div id="sSpDisconnectWrap" style="display:none;margin-top:12px;text-align:center">
+        <button class="wz-btn wz-btn-ghost" style="font-size:12px;width:auto" onclick="settingsDisconnectSpotify()">Desconectar Spotify</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
       <div class="settings-section-label">Detection Tuning</div>
       <div class="field-row">
         <div class="field">
@@ -662,6 +822,11 @@ main { max-width: 1160px; margin: 0 auto; padding: 36px 24px 100px; position: re
           <input type="number" id="sCfgSampleRate" min="8000" max="96000" placeholder="44100">
         </div>
       </div>
+      <div class="field">
+        <label>Shazam Min Matches (confianza)</label>
+        <input type="number" id="sCfgMinMatches" min="1" max="5" placeholder="1">
+        <div class="field-hint">Mínimo de matches que Shazam debe retornar para aceptar la identificación. 1 = acepta todo, 2-3 = más estricto, menos falsos positivos.</div>
+      </div>
     </div>
 
     <div class="settings-section">
@@ -680,8 +845,8 @@ main { max-width: 1160px; margin: 0 auto; padding: 36px 24px 100px; position: re
 
 <div id="nowHero">
   <div class="config-warning" id="configWarning">
-    ⚠ Last.fm is not configured or credentials are invalid.
-    <a onclick="openSettings()">Open settings →</a>
+    ⚠ Servicios no configurados — scrobbling desactivado.
+    <a onclick="openSettings()">Abrir settings →</a>
   </div>
 
   <div class="hero-bar">
@@ -693,6 +858,9 @@ main { max-width: 1160px; margin: 0 auto; padding: 36px 24px 100px; position: re
       <div class="hero-dot" id="heroDot"></div>
       <span class="hero-nowtext" id="heroNowText">Idle</span>
     </div>
+    <button class="btn-sp-like" id="heroSpLike" title="Agregar a Liked Songs de Spotify" onclick="likeCurrentTrack()">
+      ♥ Spotify
+    </button>
     <button class="btn-settings" title="Settings" onclick="openSettings()">⚙</button>
     <label class="det-toggle active" id="detToggle">
       <span id="detLabel">Recording</span>
@@ -752,6 +920,20 @@ main { max-width: 1160px; margin: 0 auto; padding: 36px 24px 100px; position: re
 
 <div class="toast-container" id="toastContainer"></div>
 
+<div class="artist-modal-overlay" id="artistModalOverlay" onclick="closeArtistModal(event)">
+  <div class="artist-modal" id="artistModal">
+    <div class="artist-modal-header">
+      <div id="artistModalCover" class="artist-modal-cover-ph">🎵</div>
+      <div><div class="artist-modal-name" id="artistModalName">—</div><div class="artist-modal-plays" id="artistModalPlays">0 plays</div></div>
+      <button class="artist-modal-close" onclick="closeArtistModal()">✕</button>
+    </div>
+    <div class="artist-modal-body">
+      <div class="artist-modal-section" id="artistModalAlbums"></div>
+      <div class="artist-modal-section" id="artistModalTracks"></div>
+    </div>
+  </div>
+</div>
+
 <script>
 const API = window.location.origin;
 let currentPeriod = "week";
@@ -791,7 +973,26 @@ function toast(msg, type="") {
 
 function wzGo(step) {
   document.querySelectorAll(".wizard-step").forEach((el,i) => el.classList.toggle("active", i === step));
-  if (step === 3) loadDevicesIntoSelect("wz3Device", null);
+  if (step === 4) loadDevicesIntoSelect("wz4Device", null);
+  if (step === 3) wzLoadSpotifyRedirectUri();
+}
+
+function wzSkipLastfm() {
+  wz.apiKey = ""; wz.apiSecret = ""; wz.username = ""; wz.passwordHash = "";
+  wzGo(3);
+}
+
+async function wzLoadSpotifyRedirectUri() {
+  try {
+    const s = await fetch(`${API}/api/spotify/status`).then(r=>r.json());
+    const uriEl = document.getElementById("wz3RedirectUri");
+    if (uriEl) uriEl.textContent = s.redirect_uri || "http://127.0.0.1:8000/api/spotify/callback";
+    if (s.connected) {
+      document.getElementById("wz3SpStatus").textContent = "✓ Conectado a Spotify";
+      document.getElementById("wz3SpStatus").className = "sp-status ok";
+      document.getElementById("wz3ConnectArea").style.display = "block";
+    }
+  } catch {}
 }
 
 async function wzStep1() {
@@ -821,6 +1022,14 @@ async function wzStep2() {
     if (d.ok) {
       wz.username = d.username;
       wz.passwordHash = d.password_hash;
+      // Guardar Last.fm antes de pasar al paso Spotify
+      await fetch(`${API}/api/config`, {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          LASTFM_API_KEY: wz.apiKey, LASTFM_API_SECRET: wz.apiSecret,
+          LASTFM_USERNAME: wz.username, LASTFM_PASSWORD_HASH: wz.passwordHash,
+        })
+      });
       wzGo(3);
     } else {
       err.textContent = d.error || "Verification failed. Check your credentials.";
@@ -833,30 +1042,72 @@ async function wzStep2() {
   btn.disabled = false; btn.textContent = "Verify & continue →";
 }
 
-async function wzStep3() {
-  const sel = document.getElementById("wz3Device");
+async function wzStep3Spotify() {
+  const clientId  = document.getElementById("wz3SpClientId").value.trim();
+  const clientSec = document.getElementById("wz3SpClientSecret").value.trim();
   const err = document.getElementById("wz3Error");
-  const btn = document.getElementById("wz3Btn");
+  if (!clientId || !clientSec) { err.textContent="Ingresa Client ID y Client Secret."; err.classList.add("show"); return; }
+  err.classList.remove("show");
+  const res = await fetch(`${API}/api/config`, {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ SPOTIFY_CLIENT_ID: clientId, SPOTIFY_CLIENT_SECRET: clientSec })
+  });
+  const d = await res.json();
+  if (!d.ok) { err.textContent = d.error || "Error guardando config."; err.classList.add("show"); return; }
+  document.getElementById("wz3ConnectArea").style.display = "block";
+  document.getElementById("wz3SpStatus").textContent = "Credenciales guardadas — ahora conecta tu cuenta";
+  document.getElementById("wz3SpStatus").className = "sp-status";
+}
+
+async function wzConnectSpotify() {
+  try {
+    const res = await fetch(`${API}/api/spotify/auth-url`).then(r=>r.json());
+    if (res.ok && res.url) {
+      window.open(res.url, "_blank", "width=500,height=700");
+      const btn = document.getElementById("wz3SpBtn");
+      btn.textContent = "Esperando autorización…"; btn.disabled = true;
+      const poll = setInterval(async () => {
+        try {
+          const s = await fetch(`${API}/api/spotify/status`).then(r=>r.json());
+          if (s.connected) {
+            clearInterval(poll);
+            document.getElementById("wz3SpStatus").textContent = `✓ Conectado${s.username ? " como " + s.username : ""}`;
+            document.getElementById("wz3SpStatus").className = "sp-status ok";
+            btn.textContent = "♫ Conectado ✓"; btn.style.background = "#15803d"; btn.disabled = false;
+          }
+        } catch {}
+      }, 2500);
+      setTimeout(() => { clearInterval(poll); if(btn.disabled) { btn.disabled = false; btn.textContent = "♫ Connect Spotify"; } }, 120000);
+    }
+  } catch {
+    document.getElementById("wz3Error").textContent = "Error obteniendo URL de auth";
+    document.getElementById("wz3Error").classList.add("show");
+  }
+}
+
+async function wzStep4() {
+  const sel = document.getElementById("wz4Device");
+  const err = document.getElementById("wz4Error");
+  const btn = document.getElementById("wz4Btn");
   if (!sel.value && sel.value !== "0") { err.textContent="Please select an audio device."; err.classList.add("show"); return; }
   err.classList.remove("show");
   btn.disabled = true; btn.textContent = "Saving…";
   try {
-    const payload = {
-      LASTFM_API_KEY:     wz.apiKey,
-      LASTFM_API_SECRET:  wz.apiSecret,
-      LASTFM_USERNAME:    wz.username,
-      LASTFM_PASSWORD_HASH: wz.passwordHash,
-      AUDIO_DEVICE_INDEX: parseInt(sel.value),
-    };
     const res = await fetch(`${API}/api/config`, {
       method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ AUDIO_DEVICE_INDEX: parseInt(sel.value) })
     });
     const d = await res.json();
     if (d.ok) {
-      document.getElementById("wz4Desc").textContent =
-        `Scrobbling to @${wz.username}. Put a record on — VinylScrobbler will do the rest.`;
-      wzGo(4);
+      const s = await fetch(`${API}/api/setup/status`).then(r=>r.json());
+      const services = [];
+      if (s.lastfm_ok) services.push(`Last.fm (@${s.username})`);
+      if (s.spotify_ok) services.push("Spotify Liked Songs");
+      const desc = services.length
+        ? `Guardando en ${services.join(" y ")}. Pon un disco — VinylScrobbler hace el resto.`
+        : "Sin servicios vinculados — las canciones se guardan en el historial local. Puedes vincular Last.fm y Spotify desde Settings en cualquier momento.";
+      document.getElementById("wz5Desc").textContent = desc;
+      wzGo(5);
     } else {
       err.textContent = d.error || "Failed to save config.";
       err.classList.add("show");
@@ -870,7 +1121,7 @@ async function wzStep3() {
 
 function closeWizard() {
   document.getElementById("wizardOverlay").classList.remove("open");
-  checkSetupStatus(false);   // refresh 
+  checkSetupStatus(false);
   loadSummary(currentPeriod);
   loadHistory(1);
 }
@@ -878,6 +1129,7 @@ function closeWizard() {
 function openSettings() {
   document.getElementById("settingsOverlay").classList.add("open");
   document.getElementById("settingsPanel").classList.add("open");
+  loadSpotifySettingsStatus();
   populateSettings();
 }
 function closeSettings() {
@@ -909,6 +1161,10 @@ async function populateSettings() {
     document.getElementById("sCfgSilence").value     = cfg.SILENCE_TIMEOUT ?? 30;
     document.getElementById("sCfgChunk").value       = cfg.CHUNK_SECONDS ?? 10;
     document.getElementById("sCfgSampleRate").value  = cfg.SAMPLE_RATE ?? 44100;
+    document.getElementById("sCfgMinMatches").value  = cfg.SHAZAM_MIN_MATCHES ?? 1;
+    const spId = cfg.SPOTIFY_CLIENT_ID || "";
+    document.getElementById("sCfgSpClientId").value = spId.startsWith("••••") ? "" : spId;
+    document.getElementById("sCfgSpRedirectUri").value = cfg.SPOTIFY_REDIRECT_URI || "http://127.0.0.1:8000/api/spotify/callback";
     await loadDevicesIntoSelect("sCfgDevice", cfg.AUDIO_DEVICE_INDEX);
   } catch {}
 }
@@ -948,6 +1204,12 @@ async function saveSettings() {
   payload.SILENCE_TIMEOUT   = parseInt(document.getElementById("sCfgSilence").value)      || 30;
   payload.CHUNK_SECONDS     = parseInt(document.getElementById("sCfgChunk").value)        || 10;
   payload.SAMPLE_RATE       = parseInt(document.getElementById("sCfgSampleRate").value)   || 44100;
+  payload.SHAZAM_MIN_MATCHES = parseInt(document.getElementById("sCfgMinMatches").value)  || 1;
+  // Spotify client ID (only update if changed and not masked)
+  const spId  = document.getElementById("sCfgSpClientId").value.trim();
+  const spSec = document.getElementById("sCfgSpClientSecret").value.trim();
+  if (spId  && !spId.startsWith("••••"))  payload.SPOTIFY_CLIENT_ID     = spId;
+  if (spSec && !spSec.startsWith("••••")) payload.SPOTIFY_CLIENT_SECRET = spSec;
 
   try {
     const res = await fetch(`${API}/api/config`, {
@@ -979,27 +1241,167 @@ async function clearAllHistory() {
   } catch { toast("Failed to clear history", "error"); }
 }
 
+/* ── Edit track in history ─────────────────────────────────────── */
+function toggleEditRow(id) {
+  const row = document.getElementById(`edit-${id}`);
+  if (!row) return;
+  row.classList.toggle("open");
+}
+
+async function saveEditPlay(id) {
+  const artist = document.getElementById(`ea-${id}`).value.trim();
+  const title  = document.getElementById(`et-${id}`).value.trim();
+  const album  = document.getElementById(`eb-${id}`).value.trim();
+  if (!artist && !title) { toast("Artista o título requerido", "error"); return; }
+  try {
+    const res = await fetch(`${API}/api/history/${id}`, {
+      method:"PATCH", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ artist, title, album })
+    });
+    if (res.ok) {
+      toast("Corrección guardada", "success");
+      // Update visible row
+      const hRow = document.querySelector(`.h-row[data-id="${id}"]`);
+      if (hRow) {
+        hRow.querySelector(".h-title").textContent  = title  || "—";
+        hRow.querySelector(".h-artist").textContent = artist || "—";
+        hRow.querySelector(".h-album").textContent  = album  || "—";
+      }
+      document.getElementById(`edit-${id}`).classList.remove("open");
+    } else {
+      toast("Error guardando corrección", "error");
+    }
+  } catch { toast("Error de red", "error"); }
+}
+
+/* ── Artist detail modal ───────────────────────────────────────── */
+async function openArtistModal(artist) {
+  const overlay = document.getElementById("artistModalOverlay");
+  overlay.classList.add("open");
+  document.getElementById("artistModalName").textContent  = artist;
+  document.getElementById("artistModalPlays").textContent = "Cargando…";
+  document.getElementById("artistModalAlbums").innerHTML  = "";
+  document.getElementById("artistModalTracks").innerHTML  = "";
+  const coverEl = document.getElementById("artistModalCover");
+  coverEl.outerHTML = `<div id="artistModalCover" class="artist-modal-cover-ph">🎵</div>`;
+
+  try {
+    const data = await fetch(`${API}/api/stats/artist/${encodeURIComponent(artist)}`).then(r=>r.json());
+    document.getElementById("artistModalPlays").textContent = `${data.total_plays} plays`;
+
+    // Cover
+    const cover = data.cover;
+    const ph = document.getElementById("artistModalCover");
+    if (cover) {
+      ph.outerHTML = `<img id="artistModalCover" class="artist-modal-cover" src="${cover}" alt="">`;
+    }
+
+    // Albums
+    if (data.albums && data.albums.length) {
+      const albumsEl = document.getElementById("artistModalAlbums");
+      albumsEl.innerHTML = `<h4>Álbumes</h4>` + data.albums.map(a =>
+        `<div class="artist-album-chip">
+          ${a.cover_url ? `<img src="${a.cover_url}" style="width:28px;height:28px;border-radius:4px;object-fit:cover">` : "💿"}
+          <span>${esc(a.album)}</span>
+          <span class="artist-album-chip-plays">${a.plays}×</span>
+        </div>`
+      ).join("");
+    }
+
+    // Top tracks
+    if (data.top_tracks && data.top_tracks.length) {
+      const tracksEl = document.getElementById("artistModalTracks");
+      tracksEl.innerHTML = `<h4>Canciones más escuchadas</h4>` + data.top_tracks.slice(0,10).map(t =>
+        `<div class="artist-track-row">
+          ${t.cover_url ? `<img src="${t.cover_url}" style="width:36px;height:36px;border-radius:4px;object-fit:cover">` : ""}
+          <div style="flex:1">
+            <div class="artist-track-title">${esc(t.title)}</div>
+            <div class="artist-track-album">${esc(t.album||"")}</div>
+          </div>
+          <span class="artist-track-plays">${t.plays}×</span>
+        </div>`
+      ).join("");
+    }
+  } catch(e) {
+    document.getElementById("artistModalPlays").textContent = "Error cargando datos";
+  }
+}
+
+function closeArtistModal(e) {
+  if (e && e.target !== document.getElementById("artistModalOverlay")) return;
+  document.getElementById("artistModalOverlay").classList.remove("open");
+}
+
+/* ── Spotify in settings ──────────────────────────────────────── */
+async function loadSpotifySettingsStatus() {
+  try {
+    const s = await fetch(`${API}/api/spotify/status`).then(r=>r.json());
+    const dot = document.getElementById("spStatusDot");
+    const txt = document.getElementById("spStatusText");
+    const connectWrap    = document.getElementById("sSpConnectWrap");
+    const disconnectWrap = document.getElementById("sSpDisconnectWrap");
+    if (!s.client_configured) {
+      dot.className = "settings-status-dot"; txt.textContent = "No configurado — ingresa Client ID y Secret";
+      connectWrap.style.display = "none"; disconnectWrap.style.display = "none";
+    } else if (s.connected) {
+      dot.className = "settings-status-dot ok";
+      txt.textContent = `Conectado${s.username ? " como " + s.username : ""}`;
+      connectWrap.style.display = "none"; disconnectWrap.style.display = "block";
+    } else {
+      dot.className = "settings-status-dot warn"; txt.textContent = "Credenciales guardadas — pendiente conectar";
+      connectWrap.style.display = "block"; disconnectWrap.style.display = "none";
+    }
+    document.getElementById("sCfgSpRedirectUri").value = s.redirect_uri || "http://127.0.0.1:8000/api/spotify/callback";
+  } catch {}
+}
+
+async function settingsConnectSpotify() {
+  try {
+    const res = await fetch(`${API}/api/spotify/auth-url`).then(r=>r.json());
+    if (res.ok && res.url) {
+      window.open(res.url, "_blank", "width=500,height=700");
+      toast("Autoriza en la ventana que se abrió — regresa aquí cuando termines", "success");
+      // Poll for connection
+      const poll = setInterval(async () => {
+        try {
+          const s = await fetch(`${API}/api/spotify/status`).then(r=>r.json());
+          if (s.connected) { clearInterval(poll); loadSpotifySettingsStatus(); toast("Spotify conectado ✓", "success"); }
+        } catch {}
+      }, 2500);
+      setTimeout(() => clearInterval(poll), 120000);
+    }
+  } catch { toast("Error obteniendo URL de Spotify", "error"); }
+}
+
+async function settingsDisconnectSpotify() {
+  if (!confirm("¿Desconectar Spotify?")) return;
+  await fetch(`${API}/api/spotify/disconnect`, { method:"POST" });
+  toast("Spotify desconectado", "success");
+  loadSpotifySettingsStatus();
+}
+
 async function checkSetupStatus(showWizardIfNeeded=true) {
   try {
     const s = await fetch(`${API}/api/setup/status`).then(r=>r.json());
     const warn = document.getElementById("configWarning");
-    if (s.setup_required || !s.lastfm_ok) {
-      if (showWizardIfNeeded && s.setup_required) {
-        document.getElementById("wizardOverlay").classList.add("open");
-      } else {
-        warn.classList.add("show");
-      }
+    if (s.setup_required) {
+      warn.classList.add("show");
     } else {
       warn.classList.remove("show");
     }
   } catch {}
 }
 
+// Track currently playing for the like button
+let _currentTrack = null;
+
 function setNowPlaying(track) {
   const dot      = document.getElementById("heroDot");
   const nowTxt   = document.getElementById("heroNowText");
   const expanded = document.getElementById("heroExpanded");
   const vinyl    = document.getElementById("logoVinyl");
+  const likeBtn  = document.getElementById("heroSpLike");
+  _currentTrack  = track || null;
   if (track) {
     dot.classList.add("live"); nowTxt.classList.add("live");
     nowTxt.textContent = `${track.artist} — ${track.title}`;
@@ -1011,10 +1413,64 @@ function setNowPlaying(track) {
     document.getElementById("heroArt").src = coverUrl;
     document.getElementById("heroCoverBg").style.backgroundImage = coverUrl ? `url('${coverUrl}')` : "none";
     expanded.classList.add("open");
+    // Show like button only if Spotify is connected
+    fetch(`${API}/api/spotify/status`).then(r=>r.json()).then(s => {
+      if (s.connected) { likeBtn.classList.add("visible"); likeBtn.classList.remove("liked"); likeBtn.textContent = "♥ Spotify"; }
+      else likeBtn.classList.remove("visible");
+    }).catch(()=>{});
   } else {
     dot.classList.remove("live"); nowTxt.classList.remove("live");
     nowTxt.textContent = "Idle"; vinyl.classList.remove("spinning");
     expanded.classList.remove("open");
+    likeBtn.classList.remove("visible", "liked");
+  }
+}
+
+async function likeCurrentTrack() {
+  if (!_currentTrack) return;
+  const btn = document.getElementById("heroSpLike");
+  btn.textContent = "…"; btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/api/spotify/like`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ artist: _currentTrack.artist, title: _currentTrack.title, album: _currentTrack.album||"" })
+    });
+    const d = await res.json();
+    if (d.ok) {
+      btn.classList.add("liked"); btn.textContent = "♥ Guardado";
+      toast("Agregado a Liked Songs ✓", "success");
+    } else {
+      btn.textContent = "♥ Spotify";
+      toast(d.error || "Error al agregar a Spotify", "error");
+    }
+  } catch {
+    btn.textContent = "♥ Spotify";
+    toast("Error de red", "error");
+  }
+  btn.disabled = false;
+}
+
+async function likeHistoryTrack(btn) {
+  const artist = btn.dataset.artist || "";
+  const title  = btn.dataset.title  || "";
+  const album  = btn.dataset.album  || "";
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/api/spotify/like`, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ artist, title, album })
+    });
+    const d = await res.json();
+    if (d.ok) {
+      btn.classList.add("liked"); btn.title = "Ya en Liked Songs";
+      toast(`"${title}" agregado a Liked Songs ✓`, "success");
+    } else {
+      toast(d.error || "Error al agregar a Spotify", "error");
+      btn.disabled = false;
+    }
+  } catch {
+    toast("Error de red", "error");
+    btn.disabled = false;
   }
 }
 
@@ -1036,10 +1492,10 @@ connectWS();
 function renderArtists(list) {
   if (!list.length) return `<div class="empty">No data</div>`;
   return list.map((a,i) => `
-    <div class="rank-item">
+    <div class="rank-item" style="cursor:pointer" onclick="openArtistModal('${esc(a.artist).replace(/'/g,"\\'")}')">
       <span class="rank-num">${i+1}</span>
       ${art(a.cover_url,"rank-cover circle")}
-      <div class="rank-info"><div class="rank-name">${esc(a.artist)}</div></div>
+      <div class="rank-info"><div class="rank-name">${esc(a.artist)}</div><div class="rank-sub" style="font-size:10px;color:var(--text3)">Ver detalle →</div></div>
       <span class="rank-plays">${a.plays}×</span>
     </div>`).join("");
 }
@@ -1105,7 +1561,20 @@ function renderHistoryRows(plays) {
       <div class="h-album">${esc(p.album||"—")}</div>
       <div class="h-badge-wrap">${p.genre ? `<span class="h-badge">${esc(p.genre)}</span>` : ""}</div>
       <span class="h-time">${timeAgo(p.timestamp)}</span>
-      <button class="btn-del" title="Delete" onclick="deletePlay(${p.id},this)">✕</button>
+      <button class="btn-edit-icon" title="Corregir" onclick="toggleEditRow(${p.id},this)" data-eid="${p.id}">✏</button>
+      <button class="btn-sp-like-row" title="Agregar a Liked Songs"
+        data-artist="${esc(p.artist||'')}" data-title="${esc(p.title||'')}" data-album="${esc(p.album||'')}"
+        onclick="likeHistoryTrack(this)">♥</button>
+      <button class="btn-del" title="Eliminar" onclick="deletePlay(${p.id},this)">✕</button>
+    </div>
+    <div class="edit-track-row" id="edit-${p.id}">
+      <div class="field"><label>Artista</label><input type="text" id="ea-${p.id}" value="${esc(p.artist||"")}"></div>
+      <div class="field"><label>Título</label><input type="text" id="et-${p.id}" value="${esc(p.title||"")}"></div>
+      <div class="field"><label>Álbum</label><input type="text" id="eb-${p.id}" value="${esc(p.album||"")}"></div>
+      <div class="edit-track-actions">
+        <button class="btn-edit-save" onclick="saveEditPlay(${p.id})">Guardar</button>
+        <button class="btn-edit-cancel" onclick="toggleEditRow(${p.id})">Cancelar</button>
+      </div>
     </div>`).join("");
 }
 
@@ -1201,6 +1670,18 @@ setInterval(() => {
   loadSummary(currentPeriod);
   if (historyPage === 1) loadHistory(1);
 }, 60_000);
+
+// PWA service worker
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js")
+    .then(() => console.log("VinylScrobbler: SW registered"))
+    .catch(e => console.warn("SW failed:", e));
+}
+
+// Handle Spotify OAuth redirect back to app
+const _sp = new URLSearchParams(window.location.search).get("spotify");
+if (_sp === "connected") { toast("Spotify conectado ✓", "success"); history.replaceState({}, "", "/"); }
+else if (_sp === "error") { toast("Error conectando Spotify — intenta de nuevo", "error"); history.replaceState({}, "", "/"); }
 </script>
 </body>
 </html>

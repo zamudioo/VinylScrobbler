@@ -7,11 +7,8 @@ _network: "pylast.LastFMNetwork | None" = None
 
 
 def init_network() -> None:
-    """(Re-)initialize the Last.fm network from current config.
-    Called on startup and whenever credentials are saved via the Settings UI.
-    """
     global _network
-    if not cfg.is_configured():
+    if not cfg.lastfm_configured():
         _network = None
         logger.warning("Last.fm not configured — scrobbling disabled")
         return
@@ -32,6 +29,22 @@ def get_network():
     return _network
 
 
+def update_now_playing(track: dict) -> None:
+    """Send 'Now Playing' update to Last.fm (shows on your profile in real-time)."""
+    net = get_network()
+    if net is None:
+        return
+    try:
+        net.update_now_playing(
+            artist=track["artist"],
+            title=track["title"],
+            album=track.get("album") or "",
+        )
+        logger.info("Last.fm: Now Playing updated")
+    except Exception as e:
+        logger.error(f"Last.fm Now Playing failed: {e}")
+
+
 def scrobble(track: dict) -> None:
     net = get_network()
     if net is None:
@@ -39,10 +52,13 @@ def scrobble(track: dict) -> None:
         return
     try:
         import time
+        # Update Now Playing first
+        update_now_playing(track)
         net.scrobble(
             artist=track["artist"],
             title=track["title"],
             timestamp=int(time.time()),
+            album=track.get("album") or "",
         )
         logger.info("Scrobbled to Last.fm")
     except Exception as e:
@@ -51,7 +67,6 @@ def scrobble(track: dict) -> None:
 
 def test_credentials(api_key: str, api_secret: str,
                      username: str, password_hash: str) -> dict:
-    """Test credentials without affecting the live network."""
     try:
         net = pylast.LastFMNetwork(
             api_key=api_key,
