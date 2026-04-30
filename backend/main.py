@@ -65,8 +65,6 @@ def _track_norm_key(track: dict) -> tuple:
     return (artist, title)
 
 
-# ── WebSocket ─────────────────────────────────────────────────────────────────
-
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
     await ws.accept()
@@ -92,8 +90,6 @@ async def broadcast(data: dict):
     for ws in dead:
         clients.discard(ws)
 
-
-# ── HTTP routes ───────────────────────────────────────────────────────────────
 
 @app.get("/")
 async def serve_stats_page():
@@ -139,9 +135,6 @@ async def toggle_detection():
     else:
         logger.info("Detection resumed")
     return {"enabled": state.detection_enabled}
-
-
-# ── Setup / Config API ────────────────────────────────────────────────────────
 
 @app.get("/api/setup/status")
 async def setup_status():
@@ -227,8 +220,6 @@ async def test_lastfm(data: dict):
     return result
 
 
-# ── Spotify OAuth ─────────────────────────────────────────────────────────────
-
 @app.get("/api/spotify/status")
 async def spotify_status():
     if not cfg.spotify_configured():
@@ -278,7 +269,6 @@ async def spotify_like(data: dict):
     return {"ok": ok}
 
 
-# ── History / Track correction ────────────────────────────────────────────────
 
 @app.patch("/api/history/{play_id}")
 async def patch_play(play_id: int, data: dict):
@@ -306,7 +296,6 @@ async def clear_all_history():
     return {"deleted": count}
 
 
-# ── Stats ─────────────────────────────────────────────────────────────────────
 
 @app.get("/api/stats/summary")
 async def stats_summary(period: str = "week"):
@@ -328,8 +317,6 @@ async def artist_detail(artist: str):
     from urllib.parse import unquote
     return get_artist_detail(unquote(artist))
 
-
-# ── Detection loop ────────────────────────────────────────────────────────────
 
 async def detection_loop():
     silence_start = None
@@ -360,10 +347,8 @@ async def detection_loop():
                     if state.current_session_id is None:
                         state.current_session_id = start_session()
 
-                    # Always record locally
                     record_play(track)
 
-                    # Last.fm — only if configured
                     if cfg.lastfm_configured():
                         scrobble(track)
                     else:
