@@ -1,5 +1,5 @@
 fastapi
-uvicorn
+uvicorn[standard]
 portaudio19-dev
 sounddevice
 numpy
